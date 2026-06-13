@@ -15,6 +15,7 @@ from typing import Optional
 from app.agents import Agent
 from app.engine.events import Event
 from app.models.memory import Memory, Relation, Thread
+from app.models.world import SeedEvent
 
 logger = logging.getLogger("echoworld.world")
 
@@ -402,7 +403,15 @@ class WorldStateMixin:
                 )
 
         if config.get("seed_events"):
-            self.seed_events = config["seed_events"]
+            # v5.4（修 F3）：转 SeedEvent 对象，否则 _inject_seed_event 用 ev.desc 会 AttributeError 被吞
+            self.seed_events = [
+                SeedEvent(
+                    desc=ev.get("desc", ""),
+                    affected=ev.get("affected", []) or [],
+                    effects=ev.get("effects", []) or [],
+                )
+                for ev in config["seed_events"]
+            ]
 
         self.agents = agents
         self.places = places_config

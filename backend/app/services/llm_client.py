@@ -148,11 +148,15 @@ class LLMClient:
             parsed = backend.lookup(self._hash(system, user), kind, system=system, user=user)
             return parsed, {**_NULL_USAGE, "provider": name, "model": "mock", "kind": kind}
 
+        # v5.4（F1b）：按 kind 给 max_tokens，reason/reflect 输出长，2048 截断致非法 JSON → fallback
+        _kind_max = {"reason": 4096, "reflect": 4096, "decide": 2048, "talk": 2048,
+                     "narrative": 2048, "summarize": 1024, "extract": 2048}
         last_err: Optional[Exception] = None
         for attempt in range(self.max_retries + 1):
             try:
                 text, usage = await asyncio.wait_for(
-                    backend.chat(system, user), timeout=self.timeout_seconds
+                    backend.chat(system, user, max_tokens=_kind_max.get(kind, 2048)),
+                    timeout=self.timeout_seconds
                 )
                 parsed = _safe_parse_json(text)
                 if parsed is None:

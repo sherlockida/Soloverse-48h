@@ -77,10 +77,17 @@ class _MockBackendBase:
                 persona = blk.group(1).strip()
 
         voice = _field(system, "说话风格")
-        m_other = re.search(r"与对方\s*([\w一-鿿·\-]+)\s*的关系", system)
-        other = m_other.group(1) if m_other else ""
-        if not other:
-            other = _field(user, "对方", "你正在和谁说话", "对手")
+        # v5.4（修 F2）：匹配实际 prompt「你和 XXX 的关系」，旧「与对方...」正则永远失配
+        m_other = re.search(r"你和\s*([\w一-鿿·\-]+)\s*的关[系情]", system)
+        if m_other:
+            other = m_other.group(1)
+        else:
+            # decide 等无「你和X的关系」的 prompt：从 nearby 取第一个非己方名
+            nearby_raw = _field(user, "此处其他人")
+            if nearby_raw and nearby_raw.strip() not in ("无", "", "（无）"):
+                other = nearby_raw.split("（")[0].split("、")[0].strip()
+            else:
+                other = ""
 
         m_rel = re.search(r"的关系：([^\n]+)", system)
         rel_summary = (m_rel.group(1).strip() if m_rel else "") or _field(user, "关系") or "中性"
@@ -143,7 +150,7 @@ class _MockBackendBase:
 
         return {
             "self_name": self_name, "persona": persona, "voice": voice,
-            "other": other or "对方", "rel_summary": rel_summary,
+            "other": other or self_name or "某人", "rel_summary": rel_summary,
             "places": places, "nearby_names": nearby_names,
             "location": location or (places[0] if places else "这里"),
             "memories": memory_lines, "threads": thread_lines,

@@ -213,20 +213,34 @@ class AgentThinkMixin(AgentBase):
             snip = str(shocks[0].get("text", ""))[:30]
             return f"刚刚{snip}…总觉得不对劲"[:80]
 
+        # v5.4（F6）：引入 threads（心事）+ traces，让 fallback 有角色感而非填表
         nearby = [n for n, _ in perception["nearby"]]
+        top_thread = sorted(self.threads, key=lambda t: -t.weight)[0] if self.threads else None
         bits = []
+        if top_thread:
+            desc = (getattr(top_thread, "desc", "") or "")[:16]
+            tgt = getattr(top_thread, "target", None) or ""
+            if tgt and tgt in nearby:
+                bits.append(f"看着{tgt}，心里想着{desc}的事")
+            elif tgt:
+                bits.append(f"不知道{tgt}现在怎么样了")
+            else:
+                bits.append(f"脑海里挥不去：{desc}")
+        if not bits and getattr(self, "recent_reasoning_traces", None):
+            last = self.recent_reasoning_traces[-1].split(":", 1)[-1].strip()[:18]
+            if last:
+                bits.append(f"（接着刚才的想法：{last}…）")
         if perception.get("just_heard"):
-            bits.append(
-                f"心里挂着「{str(perception['just_heard'])[:20]}」"
-            )
-        if nearby:
-            bits.append(f"身边有 {nearby[0]}")
+            bits.append(f"「{str(perception['just_heard'])[:16]}」这话还在耳边")
+        if not top_thread and nearby:
+            bits.append(f"身边有{nearby[0]}，要不要搭句话")
         if self.short_term_plan and self.short_term_plan.goal:
-            bits.append(
-                f"还想着「{self.short_term_plan.goal[:18]}」"
-            )
+            goal = self.short_term_plan.goal[:16]
+            bits.append(f"还有{goal}没搞定" if bits else f"接下来得{goal}")
         if hits:
-            bits.append("脑子里翻出几段旧记忆")
+            bits.append(f"突然想起{hits[0].content[:14]}")
         if not bits:
-            bits.append(f"在 {self.location} 静静待着")
-        return "；".join(bits)[:80]
+            bits.append(f"在{self.location}歇了会儿")
+        seen = set()
+        unique = [b for b in bits if not (b in seen or seen.add(b))]
+        return "；".join(unique[:3])[:80] or "（百无聊赖地发呆）"

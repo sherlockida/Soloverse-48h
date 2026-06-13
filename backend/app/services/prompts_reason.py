@@ -55,6 +55,7 @@ REASON_OUTPUT_CONTRACT = """请严格返回单个 JSON 对象（禁止 markdown 
   - tool_calls 内的 name 必须出自上方工具清单
   - move 的 place 必须出自【可去地点】；talk 的 target 必须出自【此处其他人】
   - plan_patch 可以全空 {{}}；若你完成了某步骤，记得 mark_done
+  - 若【未完结心事】栏有🔥标记的心事，thought 必须围绕它展开，tool_calls 必须推进它（talk/observe/recall 中选与心事相关的）
 """
 
 # token 预算工具
@@ -135,23 +136,27 @@ def _fmt_relations(relations_summary: Optional[list[dict]], top_k: int = 3) -> s
     return "\n".join(lines)
 
 def _fmt_threads(threads: Optional[list[Any]]) -> str:
-    """threads: list[Thread]-like, 取 .short() 或 dict {'desc','target','weight'}。"""
+    """threads: list[Thread]-like。v5.4（F4）：高权重(w>=7)🔥必须推进，中(4-6)▶建议，低(<4)·可选。"""
     if not threads:
         return "  - （无）"
     lines = []
     for t in threads[:5]:
         if hasattr(t, "short"):
-            lines.append(f"  - {t.short()}")
+            raw = t.short()
         elif isinstance(t, dict):
             tgt = t.get("target")
             w = t.get("weight", 5)
             desc = t.get("desc", "?")
-            if tgt:
-                lines.append(f"  - ({w}) 关于 {tgt}：{desc}")
-            else:
-                lines.append(f"  - ({w}) {desc}")
+            raw = f"({w}) 关于 {tgt}：{desc}" if tgt else f"({w}) {desc}"
         else:
-            lines.append(f"  - {t}")
+            raw = str(t)
+        w = t.weight if hasattr(t, "weight") else (t.get("weight", 5) if isinstance(t, dict) else 5)
+        if w >= 7:
+            lines.append(f"  🔥 {raw}")
+        elif w >= 4:
+            lines.append(f"  ▶ {raw}")
+        else:
+            lines.append(f"  · {raw}")
     return "\n".join(lines)
 
 def _fmt_situation(situation: dict, *, just_heard_max_len: int = 0,
@@ -279,7 +284,7 @@ def build_reason_prompt(
 【关系速描】(Top-3，按强度排序)
 {relations_block}
 
-【未完结心事】(优先推进)
+【未完结心事】(🔥=必须推进 ▶=建议推进)
 {threads_block}
 
 【当前 plan】

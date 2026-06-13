@@ -126,7 +126,7 @@ class AgentReflectMixin(AgentBase):
         self._apply_thread_changes(thread_changes)
 
         # 触发 summarize（顺路）
-        self._trigger_summarize(world)
+        await self._trigger_summarize(world)
 
         self.last_reflect_tick = world.tick
 

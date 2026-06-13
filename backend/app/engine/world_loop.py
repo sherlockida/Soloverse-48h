@@ -70,8 +70,8 @@ class World:
         # v5.3 pace 轨：tick 5.0 -> 8.0；给 think 链留 9-12s 余地
         self.tick_interval = float(os.getenv("TICK_INTERVAL_SECONDS", "8.0"))
         self.narrative_every = int(os.getenv("NARRATIVE_EVERY_N_TICKS", "4"))
-        self.seed_every = int(os.getenv("SEED_EVENT_EVERY_N_TICKS", "8"))
-        self.seed_prob = float(os.getenv("SEED_EVENT_PROBABILITY", "0.3"))
+        self.seed_every = int(os.getenv("SEED_EVENT_EVERY_N_TICKS", "4"))
+        self.seed_prob = float(os.getenv("SEED_EVENT_PROBABILITY", "0.7"))
         # v5: agent reflect 周期
         self.reflect_every = int(os.getenv("REFLECT_EVERY_N_TICKS", "5"))
         # 单 agent think_and_act 时间上限（占 tick_interval 一定比例）
@@ -80,6 +80,8 @@ class World:
         self.think_timeout_min = float(os.getenv("THINK_TIMEOUT_MIN", "9.0"))
         # v5.3：投种子后 2 tick 内 timeout x SHOCK_BOOST，给 LLM 更多思考时间
         self.shock_boost = float(os.getenv("SHOCK_BOOST", "1.5"))
+        # v5.4：LLM reason 独立超时，解耦 tick_interval（修 F1：旧 max(9,tick*0.8) 太短致超时降级）
+        self.reason_timeout = float(os.getenv("REASON_TIMEOUT_SECONDS", "15.0"))
         self._post_seed_boost_until_tick: int = 0
 
         self.snapshot_dir = Path(os.getenv("SNAPSHOT_PATH", "snapshots"))
@@ -194,7 +196,8 @@ class World:
         # 1) v5：think_and_act 并行（跳过玩家化身 + non-alive 角色）
         # v5.3：投种子后 _post_seed_boost_until_tick 内 timeout x shock_boost（默认 1.5）
         boost = self.shock_boost if self.tick <= self._post_seed_boost_until_tick else 1.0
-        timeout_s = max(self.think_timeout_min, self.tick_interval * self.think_timeout_ratio) * boost
+        # v5.4：reason 超时独立，给 LLM 足够时间 + 5s 余量给 tool dispatch（修 F1）
+        timeout_s = (self.reason_timeout + 5.0) * boost
         think_coros: list[asyncio.Task] = []
         npc_indices: list[int] = []
         for i, a in enumerate(self.agents):
@@ -245,7 +248,10 @@ class World:
 
         # 4) 种子事件（剧情温度计：戏剧低时主动注入）
         should_inject = False
-        if self.tick % self.seed_every == 0 and self.seed_events:
+        # v5.4（修 F3）：首 tick 强制注入一颗，确保开场即有戏剧
+        if self.tick == 1 and self.seed_events:
+            should_inject = True
+        elif self.tick % self.seed_every == 0 and self.seed_events:
             if random.random() < self.seed_prob:
                 should_inject = True
         # 戏剧温度计：每 10 tick 检查最近 30 个事件的"剧变"密度，过低就强制注入
@@ -264,7 +270,10 @@ class World:
                 should_inject = True
                 logger.info(f"剧情温度过低 (dramatic={dramatic}/30)，强制注入种子")
         if should_inject:
-            await self._inject_seed_event()
+            try:
+                await self._inject_seed_event()
+            except Exception as e:
+                logger.warning(f"种子注入失败: {e}")
 
         # 5) 叙事检测后台
         if self.tick % self.narrative_every == 0:

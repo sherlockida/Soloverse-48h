@@ -20,7 +20,7 @@ class AgentDecideMixin(AgentThinkMixin):
     """决策 Mixin — LLM 交互、工具派发、v4 兼容。继承 AgentThinkMixin。"""
 
     async def think_and_act(self, world: Any, *,
-                            timeout_seconds: float = 8.0) -> ThinkResult:
+                            timeout_seconds: float = 20.0) -> ThinkResult:
         """v5 主循环：perceive -> recall -> reason(LLM) -> dispatch tools。"""
         from app.agents.tools import dispatch_tool, is_hard, is_soft
         t0 = _t.time()
@@ -249,7 +249,8 @@ class AgentDecideMixin(AgentThinkMixin):
                    history_turns: list[dict],
                    primed_peek: Optional[str],
                    world_background: str = "",
-                   draft: str = "", intent_hint: str = "") -> TalkResult:
+                   draft: str = "", intent_hint: str = "",
+                   threads=None) -> TalkResult:
         """v4 兼容：生成对话 utterance。"""
         from app.services.prompts import build_talk_prompt
         rel = self.get_or_init_relation(other_name)
@@ -260,6 +261,7 @@ class AgentDecideMixin(AgentThinkMixin):
             secret_agenda=agenda, primed_memory=primed_peek,
             world_background=world_background,
             draft=draft or None, intent_hint=intent_hint or None,
+            threads=threads,
         )
         data, talk_usage = await llm.chat_json(sys, usr, kind="talk")
         try:

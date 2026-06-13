@@ -229,6 +229,7 @@ class WorldActionsMixin:
                 history_turns=history, primed_peek=a_primed,
                 world_background=self.story_background,
                 draft=a_draft, intent_hint=a_intent_hint,
+                threads=sorted(a.threads, key=lambda t: -t.weight)[:3],
             )
         except Exception as e:
             logger.warning(f"[{a.name}] talk raise: {e}")
@@ -247,6 +248,7 @@ class WorldActionsMixin:
                 history_turns=history[-3:], primed_peek=b_primed,
                 world_background=self.story_background,
                 draft=b_draft, intent_hint=b_intent_hint,
+                threads=sorted(b.threads, key=lambda t: -t.weight)[:3],
             )
         except Exception as e:
             logger.warning(f"[{b.name}] talk raise: {e}")

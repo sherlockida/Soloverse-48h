@@ -71,12 +71,26 @@ class NarrativeDetector:
         if not kept and self._empty_streak >= 3 and events:
             actors = list({e.actor for e in events if e.actor})[:3]
             who = "、".join(actors) if actors else "镇民们"
+            # v5.4（F6）：按事件 kind 分布选差异化模板，不再永远「各自忙活」
+            kinds = [e.kind for e in events[-6:]]
+            if kinds.count("seed") >= 2:
+                headline, predict = f"世界波动频频，{who}被卷入其中", "新的变局正在酝酿"
+            elif kinds.count("talk") >= 3:
+                headline, predict = f"一场又一场对话，{who}之间暗流涌动", "关系正在悄然变化"
+            elif kinds.count("move") >= 3:
+                headline, predict = f"{who}奔波忙碌，脚步匆匆", "他们都在赶往某个重要之处"
+            else:
+                last_ev = events[-1].text[:20] if events else ""
+                if last_ev:
+                    headline, predict = f"「{last_ev}」——{who}的一天", "平静之下总有暗涌"
+                else:
+                    headline, predict = f"{who}各自忙活，小镇暂时平静", "暗流仍在涌动"
             fallback = Headline(
-                headline=f"{who} 各自忙活，小镇暂时平静",
+                headline=headline[:40],
                 involved=actors,
                 chain=[e.text for e in events[-3:]],
                 drama=5,
-                predict_next="暗流仍在涌动",
+                predict_next=predict[:25],
                 tick=tick,
                 is_fallback=True,
             )
@@ -84,6 +98,6 @@ class NarrativeDetector:
             self.active_headlines.append(fallback)
             self.active_headlines = self.active_headlines[-20:]
             kept = [fallback]
-            logger.info("narrative fallback 触发")
+            logger.info(f"narrative fallback 触发: {headline}")
 
         return kept
