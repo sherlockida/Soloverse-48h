@@ -1,0 +1,56 @@
+# SoloVerse .gitignore
+
+# ===== 排除目录 =====
+plan/
+origin/
+.claude/
+dev-log/
+docs/
+CLAUDE.md
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ===== 虚拟环境 =====
+venv/
+.venv/
+env/
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== 环境变量 =====
+.env
+.env.local
+.env.*.local
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ===== 缓存 / 运行时 =====
+cache/
+snapshots/
+*.log
+
+# ===== 测试 / 覆盖率 =====
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ===== LLM 缓存 =====
+cache/llm_responses.jsonl
