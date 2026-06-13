@@ -1,0 +1,437 @@
+/* ====== v5: 心声流面板（右下浮动 + 毛玻璃 + 像素边）====== */
+/* NOTE: 新增组件——如果样式没生效，请 Ctrl+Shift+R 跳过缓存 */
+
+.thought-stream {
+  position: fixed;
+  right: 16px;
+  bottom: 96px;        /* 浮在 footer 之上，避开 seed 输入栏 */
+  z-index: 180;
+  width: 360px;
+  font-size: 12px;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column-reverse;  /* toggle 在下，panel 向上展开 */
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.thought-stream.collapsed .ts-panel { display: none; }
+
+.ts-toggle {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  background: var(--bg2);
+  border: 2px solid var(--accent);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.6), 0 0 14px rgba(196,154,108,0.45);
+  color: var(--gold);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.ts-toggle:hover { transform: translateY(-2px); box-shadow: 3px 5px 0 rgba(0,0,0,0.6), 0 0 18px rgba(245,199,100,0.6); }
+.ts-toggle .ts-toggle-icon { line-height: 1; }
+.ts-toggle .ts-unread {
+  position: absolute;
+  top: -6px; right: -6px;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 1px 5px;
+  border: 1px solid var(--bg);
+  min-width: 16px;
+  text-align: center;
+  font-family: monospace;
+}
+
+.ts-panel {
+  background: rgba(30, 26, 22, 0.92);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 2px solid var(--accent);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 24px rgba(196,154,108,0.25);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 50vh;
+}
+
+.ts-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.ts-title {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: bold;
+  color: var(--accent);
+  font-size: 13px;
+  margin-right: auto;
+}
+.ts-pixel-dot {
+  width: 8px; height: 8px;
+  background: var(--gold);
+  display: inline-block;
+  box-shadow: 0 0 6px var(--gold);
+}
+.ts-provider-tag {
+  background: var(--bg);
+  color: var(--fg-dim);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  font-size: 10px;
+  font-family: monospace;
+  margin-left: 4px;
+}
+.ts-provider-tag.flash-warn { }
+.ts-close {
+  background: transparent;
+  border: none;
+  color: var(--fg-dim);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+}
+.ts-close:hover { color: var(--red); }
+
+.ts-tabs {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  margin-top: 4px;
+}
+.ts-tab {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--fg-dim);
+  padding: 3px 6px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ts-tab:hover { color: var(--fg); border-color: var(--accent); }
+.ts-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: bold; }
+
+.ts-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.ts-tab-content { display: none; flex: 1; overflow: hidden; }
+.ts-tab-content.active { display: flex; flex-direction: column; }
+.ts-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.ts-empty {
+  color: var(--fg-dim);
+  font-style: italic;
+  text-align: center;
+  padding: 24px 12px;
+  font-size: 11px;
+}
+
+/* ====== thought 卡片 ====== */
+.ts-card {
+  background: var(--bg);
+  border-left: 3px solid var(--border);
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+.ts-card:hover { background: var(--bg3); border-left-color: var(--accent); }
+.ts-card.ts-me {
+  border: 2px solid var(--gold);
+  background: linear-gradient(90deg, rgba(245,199,100,0.12), var(--bg));
+  box-shadow: 0 0 6px rgba(245,199,100,0.3);
+}
+.ts-card.ts-hot { border-left-color: var(--red); }
+.ts-card.ts-tool { border-left-color: var(--blue); opacity: 0.85; }
+.ts-card.ts-plan { border-left-color: #b59cf0; }
+.ts-card.ts-reflect { border-left-color: #6bbd7d; }
+.ts-card.ts-belief { border-left-color: var(--gold); }
+.ts-card.ts-provider {
+  border-left-color: var(--fg-dim);
+  background: var(--bg2);
+  font-family: monospace;
+}
+
+.ts-card-head {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px;
+  color: var(--fg-dim);
+  margin-bottom: 3px;
+}
+.ts-card-emoji { font-size: 14px; }
+.ts-card-name { color: var(--fg); font-weight: bold; font-size: 12px; }
+.ts-card-tick { margin-left: auto; font-family: monospace; opacity: 0.7; }
+.ts-me-tag {
+  background: var(--gold);
+  color: var(--bg);
+  padding: 0 4px;
+  font-size: 9px;
+  font-weight: bold;
+}
+.ts-card-text {
+  color: var(--fg);
+  line-height: 1.45;
+  word-wrap: break-word;
+  font-size: 12px;
+}
+.ts-card-expand {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 2px 0;
+  font-family: inherit;
+}
+.ts-card-expand:hover { color: var(--gold); }
+.ts-card-trace {
+  display: none;
+  margin-top: 4px;
+  padding: 4px 6px;
+  background: var(--bg2);
+  border-left: 2px solid var(--border);
+  color: var(--fg-dim);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.ts-card.expanded .ts-card-trace { display: block; }
+
+/* ====== plan tab 卡片 ====== */
+.ts-plan-card {
+  background: var(--bg);
+  border-left: 3px solid #b59cf0;
+  padding: 6px 8px;
+}
+.ts-plan-head {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px;
+  color: var(--fg-dim);
+  margin-bottom: 4px;
+}
+.ts-plan-goal { color: var(--gold); font-size: 12px; margin-bottom: 4px; }
+.ts-plan-steps { margin: 0; padding-left: 18px; font-size: 11px; }
+.ts-plan-step { line-height: 1.5; color: var(--fg); }
+.ts-plan-step.ts-step-done { color: var(--fg-dim); text-decoration: line-through; }
+.ts-plan-step.ts-step-doing { color: var(--accent); font-weight: bold; }
+.ts-step-sym { color: var(--accent); font-family: monospace; margin-right: 3px; }
+.ts-step-done .ts-step-sym { color: var(--green); }
+.ts-step-doing .ts-step-sym { color: var(--gold); }
+
+/* ====== recall tab 卡片 ====== */
+.ts-recall-card {
+  background: var(--bg);
+  border-left: 3px solid var(--blue);
+  padding: 6px 8px;
+}
+.ts-recall-head {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px;
+  color: var(--fg-dim);
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.ts-recall-q { color: var(--accent); font-size: 11px; flex: 1; min-width: 100%; }
+.ts-recall-hits { margin: 0; padding-left: 16px; font-size: 11px; color: var(--fg); }
+.ts-recall-hits li { line-height: 1.45; margin-bottom: 2px; }
+.ts-recall-score {
+  color: var(--gold);
+  font-family: monospace;
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+/* ====== v5.1 心声卡片：本条 token 小标 ====== */
+.ts-card-tokens {
+  font-family: monospace;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-left: 4px;
+  letter-spacing: 0.3px;
+}
+.ts-card-tokens.ts-tk-real {
+  background: rgba(245, 199, 100, 0.18);
+  color: var(--gold);
+  border: 1px solid rgba(245, 199, 100, 0.4);
+}
+.ts-card-tokens.ts-tk-mock {
+  background: rgba(155, 143, 126, 0.12);
+  color: var(--fg-dim);
+  border: 1px solid var(--border);
+}
+
+/* ====== tool-use 轨：工具调用卡片 + 总览条 ====== */
+
+/* 心声面板顶部总览条 */
+.ts-tool-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--fg-dim);
+  flex-wrap: wrap;
+}
+.ts-tool-stats .tts-empty { color: var(--fg-dim); font-style: italic; }
+.ts-tool-stats .tts-main { color: var(--fg); }
+.ts-tool-stats .tts-main b { color: var(--gold); font-family: monospace; }
+.ts-tool-stats .tts-chips { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.ts-tool-stats .tts-chip {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--accent);
+  cursor: help;
+}
+
+/* tool 卡片本体（覆盖 v5 默认 .ts-tool 的 opacity） */
+.ts-card.ts-tool {
+  border-left: 3px solid var(--blue);
+  padding: 6px 8px;
+  font-size: 12px;
+  opacity: 1;
+  background: var(--bg);
+}
+.ts-card.ts-tool.ts-tool-fail {
+  border-left-color: var(--red);
+  background: linear-gradient(90deg, rgba(215,107,107,0.10), var(--bg));
+}
+.ts-card.ts-tool.ts-tool-nested {
+  margin-left: 12px;
+  border-left-color: var(--fg-dim);
+}
+.ts-card.ts-tool .ts-tool-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--fg-dim);
+}
+.ts-card.ts-tool .ts-tool-name {
+  color: var(--blue);
+  font-size: 13px;
+  letter-spacing: 0.4px;
+}
+.ts-card.ts-tool .ts-tool-name b { color: var(--fg); }
+.ts-card.ts-tool .ts-card-name { color: var(--fg); font-weight: bold; font-size: 11px; }
+.ts-card.ts-tool .ts-card-tick { margin-left: auto; }
+
+.ts-tool-source {
+  background: var(--bg3);
+  color: var(--fg-dim);
+  border: 1px solid var(--border);
+  padding: 0 5px;
+  font-size: 9px;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+
+/* 延迟 badge：绿/黄/红 */
+.ts-lat {
+  font-family: monospace;
+  font-size: 10px;
+  padding: 1px 5px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+.ts-lat.lat-fast { color: #7ec77a; }
+.ts-lat.lat-mid  { color: #f0c060; }
+.ts-lat.lat-slow { color: #e57373; }
+
+/* parent_thought（嵌套提示） */
+.ts-tool-parent {
+  color: var(--fg-dim);
+  font-style: italic;
+  font-size: 11px;
+  margin-bottom: 3px;
+  padding-left: 4px;
+  border-left: 2px dotted var(--border);
+}
+
+/* args 区：等宽 KV */
+.ts-tool-args {
+  font-family: 'Consolas', 'Monaco', monospace;
+  background: rgba(255,255,255,0.05);
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--fg);
+  line-height: 1.5;
+  word-break: break-all;
+}
+.ts-tool-args .ts-tool-empty { color: var(--fg-dim); font-style: italic; font-family: inherit; }
+.ts-tool-arg-kv {
+  display: inline-block;
+  background: var(--bg2);
+  padding: 1px 4px;
+  margin: 1px 2px;
+  border: 1px solid var(--border);
+}
+.ts-tool-arg-k { color: var(--accent); }
+.ts-tool-arg-v { color: var(--gold); }
+.ts-tool-arg-row { margin: 3px 0; }
+.ts-tool-arg-vlong {
+  display: block;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  margin: 2px 0 0 8px;
+  padding: 3px 6px;
+  white-space: pre-wrap;
+  color: var(--gold);
+  font-size: 10px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+/* result 行 + 展开 JSON */
+.ts-tool-result {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--fg);
+  line-height: 1.4;
+}
+.ts-tool-result-details { margin-top: 4px; font-size: 11px; }
+.ts-tool-result-details > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 10px;
+  font-family: inherit;
+  padding: 2px 0;
+  user-select: none;
+}
+.ts-tool-result-details > summary:hover { color: var(--gold); }
+.ts-tool-result-pre {
+  margin: 4px 0 0;
+  padding: 6px 8px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border);
+  color: #c9d1d9;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 10px;
+  line-height: 1.45;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre;
+}

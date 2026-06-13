@@ -1,0 +1,117 @@
+/* ====== Landing Page ====== */
+
+#landing-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 40px 24px 60px;
+  text-align: center;
+  overflow-y: auto;
+}
+
+.landing-hero { margin-bottom: 40px; }
+
+.pixel-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 32px;
+  color: var(--accent);
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+  margin: 0 0 12px;
+  letter-spacing: 4px;
+}
+
+.pixel-subtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--fg-dim);
+  margin: 0 0 8px;
+}
+
+.landing-desc {
+  color: var(--fg-dim);
+  font-size: 14px;
+  max-width: 500px;
+  margin: 16px auto 0;
+  line-height: 1.6;
+}
+
+.hero-canvas {
+  display: block;
+  margin: 14px auto 0;
+  image-rendering: pixelated;
+  width: 384px;     /* CSS 显示尺寸，比内部 512 小 → 缩放更紧凑 */
+  height: 240px;
+  border: 2px solid var(--border);
+  box-shadow: 0 0 24px rgba(196,154,108,0.25);
+  background: #000;
+}
+
+.theme-grid-landing {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.theme-card {
+  background: var(--bg2);
+  border: var(--pixel-border);
+  border-radius: 0;
+  padding: 12px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  width: 240px;
+  text-align: center;
+}
+
+.theme-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+}
+
+.theme-card:hover .theme-card-label { color: var(--accent); }
+
+.theme-preview-canvas {
+  width: 200px;
+  height: 120px;
+  image-rendering: pixelated;
+  background: #000;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.theme-card-label {
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+
+.theme-card-desc {
+  font-size: 12px;
+  color: var(--fg-dim);
+}
+
+.landing-actions { display: flex; gap: 16px; }
+
+/* Featured 主题卡片 */
+.theme-card.featured {
+  position: relative;
+  border-color: var(--gold);
+  box-shadow: 0 0 16px rgba(245,199,100,0.35);
+}
+.card-ribbon {
+  position: absolute;
+  top: -8px; right: -8px;
+  background: linear-gradient(135deg, var(--red), var(--gold));
+  color: #fff;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: bold;
+  z-index: 2;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  transform: rotate(6deg);
+}
