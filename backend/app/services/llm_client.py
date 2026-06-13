@@ -149,7 +149,7 @@ class LLMClient:
             return parsed, {**_NULL_USAGE, "provider": name, "model": "mock", "kind": kind}
 
         # v5.4（F1b）：按 kind 给 max_tokens，reason/reflect 输出长，2048 截断致非法 JSON → fallback
-        _kind_max = {"reason": 4096, "reflect": 4096, "decide": 2048, "talk": 2048,
+        _kind_max = {"reason": 4096, "reflect": 4096, "decide": 2048, "talk": 3072,
                      "narrative": 2048, "summarize": 1024, "extract": 2048}
         last_err: Optional[Exception] = None
         for attempt in range(self.max_retries + 1):

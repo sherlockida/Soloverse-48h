@@ -73,3 +73,15 @@ def test_fallback_thought_thread_driven():
     perception = {"nearby": [("沈晚", "中性")], "just_heard": None, "world_shocks": []}
     out = a._fallback_thought(perception, [])
     assert "沈晚" in out, f"fallback 应含心事 target '沈晚'，实际：{out}"
+
+
+def test_talk_fallback_thread_driven():
+    """talk fallback 应优先用针对对方的心事（thread），而非死板「话到嘴边」。"""
+    from app.agents import Agent
+    from app.models.memory import Thread
+    a = Agent(name="江屿", emoji="🏄", persona="x", voice="y", goals=[], location="z",
+              threads=[Thread(desc="怀疑她在演", target="沈晚", weight=9)])
+    rel = a.get_or_init_relation("沈晚")
+    result = a._talk_fallback("沈晚", rel, "")
+    assert "演" in result.utterance, f"talk fallback 应含针对沈晚的心事，实际：{result.utterance}"
+    assert result.intent == "试探"

@@ -278,17 +278,31 @@ class AgentDecideMixin(AgentThinkMixin):
             return TalkResult(utterance="……", inner_thought="", intent="敷衍")
 
     def _talk_fallback(self, other_name: str, rel, agenda: str) -> TalkResult:
-        """LLM 未返回 dict 时的对话兜底。"""
+        """LLM 未返回 dict 时的对话兜底。v5.4：优先用针对对方的心事(thread)，让兜底也有戏。"""
+        # v5.4：优先找针对 other_name 的高权重 thread
+        rel_thread = None
+        if getattr(self, "threads", None):
+            targeted = [t for t in self.threads if getattr(t, "target", None) == other_name]
+            pool = targeted or list(self.threads)
+            if pool:
+                rel_thread = max(pool, key=lambda t: getattr(t, "weight", 0))
+        if rel_thread:
+            desc = (getattr(rel_thread, "desc", "") or "")[:16]
+            return TalkResult(
+                utterance=f"……我一直想问你，{desc}。",
+                inner_thought=f"（{desc}，今天得弄清楚）",
+                intent="试探",
+            )
         recent_mem = self.recent_memories(1)
         hint = (recent_mem[0].content[:14] if recent_mem
                 else (self.primed_memory[:14] if self.primed_memory else ""))
         agenda_snip = (agenda or "").split("：")[-1][:12]
-        if hint:
-            utt = f"……关于{hint}……（话到嘴边）"
-            inner = f"（{hint}……还在心里）"
-        elif agenda_snip:
+        if agenda_snip:
             utt = f"我想问你件事——关于{agenda_snip}。"
             inner = f"（{agenda_snip}得问出来）"
+        elif hint:
+            utt = f"……关于{hint}，你怎么看？"
+            inner = f"（{hint}……还在心里）"
         else:
             rel_tag = rel.summary() or "中性"
             utt = f"……（看着{other_name}，欲言又止）"
