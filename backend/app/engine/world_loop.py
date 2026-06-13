@@ -18,6 +18,7 @@ from typing import Optional
 
 from app.agents import Action, Agent
 from app.engine.events import Event, EventBus
+from app.models.world import SeedEvent
 from app.narrative import NarrativeDetector
 from app.services import LLMClient, load_agents_and_places, load_seed_events
 
@@ -45,7 +46,7 @@ class World:
         # 加载种子
         self.agents: list[Agent] = []
         self.places: list[str] = []
-        self.seed_events: list[dict] = []
+        self.seed_events: list[SeedEvent] = []
         self.reload_seeds()
 
         # 世界配置
@@ -86,6 +87,7 @@ class World:
 
         self._running = False
         self._loop_task: Optional[asyncio.Task] = None
+        self._background_tasks: set[asyncio.Task] = set()
 
     # ---------- 加载/重置 ----------
 
@@ -130,6 +132,12 @@ class World:
     async def stop_loop(self) -> None:
         """停止 tick 主循环。"""
         self._running = False
+        # Cancel all retained background tasks first
+        for t in list(self._background_tasks):
+            t.cancel()
+        if self._background_tasks:
+            await asyncio.gather(*self._background_tasks, return_exceptions=True)
+        self._background_tasks.clear()
         if self._loop_task:
             self._loop_task.cancel()
             try:
@@ -137,6 +145,13 @@ class World:
             except asyncio.CancelledError:
                 pass
             self._loop_task = None
+
+    def _spawn_background(self, coro) -> asyncio.Task:
+        """Create a background task and retain a strong reference to prevent GC."""
+        task = asyncio.create_task(coro)
+        self._background_tasks.add(task)
+        task.add_done_callback(self._background_tasks.discard)
+        return task
 
     async def _loop(self) -> None:
         """Tick 主循环体：广播欢迎 -> do_tick -> 按间隔 sleep。"""
@@ -226,7 +241,7 @@ class World:
 
         # 3.6) v5：周期性 reflect（错峰，每 tick 只让 1-2 个 agent reflect 以控 LLM 压力）
         if self.tick % self.reflect_every == 0:
-            asyncio.create_task(self._run_periodic_reflects())
+            self._spawn_background(self._run_periodic_reflects())
 
         # 4) 种子事件（剧情温度计：戏剧低时主动注入）
         should_inject = False
@@ -255,7 +270,7 @@ class World:
         if self.tick % self.narrative_every == 0:
             recent = self.event_bus.recent_for_narrative(15)
             if recent:
-                asyncio.create_task(self._run_narrative(recent))
+                self._spawn_background(self._run_narrative(recent))
 
         # 5.5) 性格演化（每 20 tick）
         if self.tick > 0 and self.tick % 20 == 0:

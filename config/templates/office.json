@@ -1,0 +1,152 @@
+{
+  "theme": "office",
+  "story_background": "一家正在裁员风暴前夕的互联网公司。年终奖刚发，KPI 评级是隐忍的伤口。老板暴躁多疑，HR 是老板的眼线，同事之间表面和睦背后较劲。茶水间是情报中心，吸烟区是结盟之地，会议室是斗兽场。每个人都揣着一份秘密——晋升名额、暗恋对象、跳槽 offer、被上司偷拿的方案。今晚的年会，会有事发生。",
+  "places": ["工位区", "会议室", "茶水间", "总监办公室", "吸烟区", "走廊"],
+  "agents": [
+    {
+      "name": "陈总",
+      "role": "boss",
+      "emoji": "👔",
+      "persona": "公司总监，45 岁，事业型。表面强势果断，私下害怕被董事会换掉。最近频繁见猎头，可能在留后路。",
+      "voice": "短促、命令式，常用反问。生气时叫人全名。",
+      "goals": ["保住自己的位置", "把业绩做漂亮", "找出谁泄露了商业方案"],
+      "location": "总监办公室",
+      "color_palette": {"skin": "#d4a880", "hair": "#1a1a1a", "clothes": "#1a1a3a", "eyes": "#3a3a4a", "accessory": "#c0a020"},
+      "threads": [
+        {"desc": "怀疑团队里有人偷偷把方案给了竞品", "target": "李婷", "weight": 9},
+        {"desc": "对小赵的能力有戒心，想压制她升职", "target": "小赵", "weight": 7}
+      ]
+    },
+    {
+      "name": "Mia",
+      "role": "hr",
+      "emoji": "💼",
+      "persona": "HR 主管，30 岁，老板的传声筒和情报员。表面亲切随和，私下做的事让自己也心虚。",
+      "voice": "句末爱加'呢、哦、啦'，营造亲和感，关键信息却故意含糊。",
+      "goals": ["执行老板的人事意图", "维护表面和谐", "保住自己的位置"],
+      "location": "工位区",
+      "color_palette": {"skin": "#f0c8a0", "hair": "#5a3a2a", "clothes": "#a05a6a", "eyes": "#5a4a3a", "accessory": "#e8c890"},
+      "threads": [
+        {"desc": "上周给陈总写了一份私下排序的裁员名单", "target": "陈总", "weight": 8},
+        {"desc": "答应过小赵会帮她争取，但其实没动作", "target": "小赵", "weight": 6}
+      ]
+    },
+    {
+      "name": "小赵",
+      "role": "designer",
+      "emoji": "🎨",
+      "persona": "27 岁设计师，业务能力很强但内向。被老板边缘化，最近偷偷面试了别家。喜欢同部门的程序员阿凯但没说出口。",
+      "voice": "细声细气，话不多，写消息比说话顺。",
+      "goals": ["拿到那份升职名额", "决定走不走", "鼓起勇气表白阿凯"],
+      "location": "工位区",
+      "color_palette": {"skin": "#f5d8b8", "hair": "#3a2018", "clothes": "#5a8a9a", "eyes": "#4a6a8a", "accessory": "#ffb8c8"},
+      "threads": [
+        {"desc": "暗恋阿凯一年了，对方似乎没察觉", "target": "阿凯", "weight": 10},
+        {"desc": "正在面试另一家公司，已过两轮", "target": null, "weight": 7},
+        {"desc": "知道李婷在背后说自己坏话", "target": "李婷", "weight": 6}
+      ]
+    },
+    {
+      "name": "阿凯",
+      "role": "engineer",
+      "emoji": "🧑‍💻",
+      "persona": "29 岁后端，技术核心，看起来钝感力满点。其实早就察觉小赵的目光，但他对部门 leader 林姐有点意思。",
+      "voice": "言简意赅，被问私事会绕话题，技术问题反而能滔滔不绝。",
+      "goals": ["不要被卷进办公室政治", "搞定手上的服务重构", "弄清自己对林姐到底是不是错觉"],
+      "location": "工位区",
+      "color_palette": {"skin": "#e8c8a0", "hair": "#2a2a2a", "clothes": "#3a3a5a", "eyes": "#3a4a5a", "accessory": "#4a9eff"},
+      "threads": [
+        {"desc": "对 leader 林姐有好感，不敢承认", "target": "林姐", "weight": 7},
+        {"desc": "察觉小赵对自己的特殊，但装作不知道", "target": "小赵", "weight": 5}
+      ]
+    },
+    {
+      "name": "李婷",
+      "role": "salesperson",
+      "emoji": "💄",
+      "persona": "32 岁销售，业绩王，嘴最利。和陈总关系暧昧，部门里很多人议论。把小赵视作晋升路上的对手。",
+      "voice": "甜中带刺，先笑后扎，遇上女同事爱用'妹妹'。",
+      "goals": ["拿下大客户的续约", "排除小赵这个竞争者", "稳住和陈总的特殊关系"],
+      "location": "茶水间",
+      "color_palette": {"skin": "#f0c0a0", "hair": "#8b3a3a", "clothes": "#d04060", "eyes": "#5a3a3a", "accessory": "#ffcc00"},
+      "threads": [
+        {"desc": "和陈总有不能公开的暧昧", "target": "陈总", "weight": 9},
+        {"desc": "在 HR 那里说过小赵坏话", "target": "小赵", "weight": 7}
+      ]
+    },
+    {
+      "name": "林姐",
+      "role": "leader",
+      "emoji": "👩‍💼",
+      "persona": "35 岁部门 leader，结过一次婚刚离，事业心强但也疲惫。技术 + 管理双线在压，最近开始焦虑。",
+      "voice": "稳重平和，偶尔流露疲态，喜欢用'其实……'开头说真话。",
+      "goals": ["把部门带过这次裁员", "处理好和阿凯之间微妙的氛围", "决定自己要不要争总监位"],
+      "location": "会议室",
+      "color_palette": {"skin": "#e8c8a8", "hair": "#3a2a1a", "clothes": "#4a5a4a", "eyes": "#3a4a3a", "accessory": "#8aa094"},
+      "threads": [
+        {"desc": "察觉到阿凯的目光，自己也有些动摇", "target": "阿凯", "weight": 7},
+        {"desc": "正在和陈总暗中角力，想拿下总监位置", "target": "陈总", "weight": 8}
+      ]
+    },
+    {
+      "name": "老周",
+      "role": "veteran",
+      "emoji": "🧓",
+      "persona": "48 岁老员工，公司元老级别。不站队不参与争斗，但什么都看在眼里。常在茶水间出现，是公司行走的情报库。",
+      "voice": "慢悠悠，喜欢说'你们年轻人啊……'，话里有话。",
+      "goals": ["平稳退到退休", "护住几个看好的年轻人"],
+      "location": "茶水间",
+      "color_palette": {"skin": "#c0a080", "hair": "#c0c0c0", "clothes": "#5a5a6a", "eyes": "#5a5a6a", "accessory": "#3a3a3a"},
+      "threads": [
+        {"desc": "知道陈总和李婷的事，但从不点破", "target": "陈总", "weight": 6},
+        {"desc": "想暗中提醒小赵跳槽是不是更好", "target": "小赵", "weight": 5}
+      ]
+    },
+    {
+      "name": "Tina",
+      "role": "intern",
+      "emoji": "🧑‍🎓",
+      "persona": "23 岁实习生，刚毕业，活泼好奇，最爱在每个工位间转。无意中目击了茶水间陈总和李婷的某次拉手。",
+      "voice": "网感重、爱用流行词、句末加 '哈哈'，紧张时反而装老练。",
+      "goals": ["争取转正名额", "和大家都搞好关系", "搞清自己撞见的那一幕是什么意思"],
+      "location": "走廊",
+      "color_palette": {"skin": "#f5d8b8", "hair": "#6b4a6a", "clothes": "#ffb8d8", "eyes": "#4a6a8a", "accessory": "#a0a0ff"},
+      "threads": [
+        {"desc": "撞见过陈总和李婷在茶水间拉手", "target": "李婷", "weight": 9},
+        {"desc": "想问老周公司到底有没有救", "target": "老周", "weight": 5}
+      ]
+    }
+  ],
+  "relations": [
+    {"from": "陈总", "to": "李婷", "trust":  5, "fondness":  6, "jealousy": 0, "guilt": 4},
+    {"from": "李婷", "to": "陈总", "trust":  4, "fondness":  5, "jealousy": 0, "guilt": 3},
+    {"from": "陈总", "to": "林姐", "trust": -2, "fondness":  0, "jealousy": 5, "guilt": 1},
+    {"from": "林姐", "to": "陈总", "trust": -3, "fondness": -1, "jealousy": 4, "guilt": 0},
+    {"from": "小赵", "to": "阿凯", "trust":  4, "fondness":  9, "jealousy": 0, "guilt": 0},
+    {"from": "阿凯", "to": "小赵", "trust":  3, "fondness":  2, "jealousy": 0, "guilt": 2},
+    {"from": "阿凯", "to": "林姐", "trust":  4, "fondness":  6, "jealousy": 0, "guilt": 1},
+    {"from": "林姐", "to": "阿凯", "trust":  3, "fondness":  4, "jealousy": 0, "guilt": 3},
+    {"from": "小赵", "to": "李婷", "trust": -5, "fondness": -4, "jealousy": 3, "guilt": 0},
+    {"from": "李婷", "to": "小赵", "trust": -3, "fondness": -3, "jealousy": 5, "guilt": 1},
+    {"from": "Mia", "to": "陈总", "trust":  6, "fondness":  1, "jealousy": 0, "guilt": 4},
+    {"from": "Mia", "to": "小赵", "trust":  1, "fondness":  2, "jealousy": 0, "guilt": 5},
+    {"from": "老周", "to": "陈总", "trust": -1, "fondness":  0, "jealousy": 0, "guilt": 0},
+    {"from": "老周", "to": "小赵", "trust":  4, "fondness":  3, "jealousy": 0, "guilt": 0},
+    {"from": "Tina", "to": "李婷", "trust": -2, "fondness": -1, "jealousy": 0, "guilt": 2},
+    {"from": "Tina", "to": "老周", "trust":  5, "fondness":  3, "jealousy": 0, "guilt": 0}
+  ],
+  "seed_events": [
+    {"desc": "公司群里突然弹出裁员名单截图（真假未明）", "affected": ["陈总", "Mia", "小赵", "阿凯", "李婷", "林姐", "老周", "Tina"]},
+    {"desc": "茶水间出现一封没署名的纸条：『有人把方案泄露给了竞品』", "affected": ["陈总", "李婷", "Mia"]},
+    {"desc": "小赵的电脑里被发现一份准备好的离职申请草稿", "affected": ["小赵", "阿凯", "Mia"]},
+    {"desc": "李婷把昨晚和陈总私下吃饭的合照不小心发到了大群", "affected": ["李婷", "陈总", "林姐", "Tina"]},
+    {"desc": "阿凯收到林姐深夜发来的一条意味不明的微信", "affected": ["阿凯", "林姐", "小赵"]},
+    {"desc": "HR 系统挂了，传闻所有薪资数据都被泄露", "affected": ["Mia", "陈总", "老周"]},
+    {"desc": "工位上一束没署名的鲜花，卡片写着小赵的名字", "affected": ["小赵", "阿凯", "李婷"]},
+    {"desc": "陈总当众怒摔笔记本", "affected": ["陈总", "Mia", "林姐"]},
+    {"desc": "Tina 偷偷在工位 vlog 拍到了不该拍的画面", "affected": ["Tina", "陈总", "李婷"]},
+    {"desc": "全公司收到匿名邮件：『今晚 8 点，茶水间，有人需要给个交代』", "affected": ["陈总", "李婷", "林姐", "小赵", "阿凯"]},
+    {"desc": "老周在吸烟区悄悄递给小赵一份资料", "affected": ["老周", "小赵"]},
+    {"desc": "阿凯的电脑屏保被换成了一张和林姐的合照（不知谁干的）", "affected": ["阿凯", "林姐", "小赵"]}
+  ]
+}

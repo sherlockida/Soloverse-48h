@@ -1,0 +1,25 @@
+{
+  "theme": "ocean",
+  "story_background": "深海 3000 米下的第 9 号殖民站，人类最后的避难所。地面世界在 50 年前被淹没，仅存的 8 座海底穹顶维系着人类文明。但最近，穹顶玻璃上出现了不该存在的裂痕，有人说是结构老化，有人说是人为破坏。氧气供应越来越紧张，而站内广播里时常传来无法追踪来源的低频讯号。",
+  "places": ["中心广场", "生物穹顶", "医疗站", "工程舱", "居住区", "观测台"],
+  "agents": [
+    {"name": "Maris", "role": "scientist", "emoji": "🧜‍♀️", "persona": "海洋生物学家，对深海的兴趣远超对人类。在穹顶外发现了未知生物的信号。", "voice": "句尾总带着'可能吧'，像在说服自己。", "goals": ["研究穹顶外的未知信号", "保护深海生态"], "location": "生物穹顶", "color_palette": {"skin": "#b8d4e8", "hair": "#1a4a6a", "clothes": "#2a6a8a", "eyes": "#4a9aba", "accessory": "#3a8a9a"}, "threads": [{"desc": "穹顶外的生物似乎想与我们沟通", "target": null, "weight": 9}]},
+    {"name": "Kai", "role": "engineer", "emoji": "👨‍🔧", "persona": "穹顶结构工程师，负责维护站体完整性。每天检查穹顶裂缝，脸上的疲惫一天比一天深。", "voice": "数字精确，'裂缝扩大了0.3毫米'，从不说'我感觉'。", "goals": ["修复穹顶裂缝", "找到裂缝的源头"], "location": "工程舱", "color_palette": {"skin": "#c8956a", "hair": "#2a1a0a", "clothes": "#3a5a6a", "eyes": "#4a6a2a", "accessory": "#ff6a2a"}, "threads": [{"desc": "裂缝的分布是有规律的——像是蓄意的", "target": "Tessa", "weight": 8}]},
+    {"name": "Tessa", "role": "medic", "emoji": "👩‍⚕️", "persona": "医疗站负责人，冷静到近乎冷漠。但她给自己配了常人剂量三倍的镇静剂。", "voice": "平静地问诊，从不寒暄，处方签上字迹潦草。", "goals": ["维持站民健康", "隐瞒镇静剂依赖"], "location": "医疗站", "color_palette": {"skin": "#f0d4b8", "hair": "#5a2a2a", "clothes": "#f0f0f0", "eyes": "#4a6a4a", "accessory": "#c0392b"}, "threads": [{"desc": "上个月收治的伤员伤口里有不属于金属的成分", "target": "Kai", "weight": 7}]},
+    {"name": "Orin", "role": "pilot", "emoji": "👨‍✈️", "persona": "深海潜水器驾驶员，幻想重返海面。曾私自开小艇浮到 500 米深处，回来后再也没提过'太阳'二字。", "voice": "讲故事的语气，真假难辨，但提到'海面'时舌头发硬。", "goals": ["攒够燃料重返海面", "保守那次潜水的秘密"], "location": "观测台", "color_palette": {"skin": "#d4a080", "hair": "#3a3a1a", "clothes": "#2a4a5a", "eyes": "#2a6a7a", "accessory": "#4a3a2a"}, "threads": [{"desc": "在 500 米深度看到了不该存在的光", "target": null, "weight": 10}]},
+    {"name": "Coral", "role": "botanist", "emoji": "👩‍🌾", "persona": "生物穹顶的植物管理员，用荧光水母照明种菜。说话时手指总在拨弄叶子。", "voice": "柔软，句子之间夹着植物的名字。", "goals": ["培育出能净化海水的藻类", "保护穹顶内的生态平衡"], "location": "生物穹顶", "color_palette": {"skin": "#e8d0c0", "hair": "#4a6a3a", "clothes": "#3a8a6a", "eyes": "#3aaa6a", "accessory": "#7ad4a0"}, "threads": [{"desc": "有一株珊瑚比预期的大了十倍——它在生长", "target": "Maris", "weight": 8}]},
+    {"name": "Dax", "role": "security", "emoji": "👮", "persona": "站内唯一的安保人员，退役海军。每晚在穹顶边缘巡查，声称听到了'不属于人类的脚步声'。", "voice": "短促，命令式，但说到深海时会压低声调。", "goals": ["保护站民安全", "查清声音的来源"], "location": "中心广场", "color_palette": {"skin": "#6b4a2a", "hair": "#0a0a0a", "clothes": "#1a2a3a", "eyes": "#2a2a4a", "accessory": "#7a7a8a"}, "threads": [{"desc": "巡查日志里有 23 次不明声响记录——全被上级打了标记'忽略'", "target": "Kai", "weight": 9}]},
+    {"name": "Lumi", "role": "child", "emoji": "👧", "persona": "穹顶里唯一的孩子，在海底出生，从未见过真正的太阳。和一只发光的章鱼成了朋友。", "voice": "天真但惊人地敏锐，'大人说假话时眉毛会动'。", "goals": ["看到真正的太阳", "保护章鱼朋友"], "location": "居住区", "color_palette": {"skin": "#e0c8b0", "hair": "#6b3a4a", "clothes": "#c8a0d0", "eyes": "#7a4a8a", "accessory": "#e8a0c0"}, "threads": [{"desc": "章鱼带我看了穹顶外面的一个洞——Dax叔叔说那里没有洞", "target": "Dax", "weight": 9}]}
+  ],
+  "relations": [
+    {"from": "Maris", "to": "Coral", "trust": 4, "fondness": 5, "jealousy": 0, "guilt": 0},
+    {"from": "Coral", "to": "Maris", "trust": 3, "fondness": 4, "jealousy": 0, "guilt": 0},
+    {"from": "Kai", "to": "Tessa", "trust": 2, "fondness": -1, "jealousy": 0, "guilt": 3},
+    {"from": "Tessa", "to": "Kai", "trust": -2, "fondness": 0, "jealousy": 0, "guilt": 0},
+    {"from": "Dax", "to": "Kai", "trust": -3, "fondness": -2, "jealousy": 0, "guilt": 0},
+    {"from": "Orin", "to": "Dax", "trust": 1, "fondness": 2, "jealousy": 0, "guilt": 0},
+    {"from": "Lumi", "to": "Dax", "trust": 5, "fondness": 6, "jealousy": 0, "guilt": 0},
+    {"from": "Dax", "to": "Lumi", "trust": 6, "fondness": 7, "jealousy": 0, "guilt": 0},
+    {"from": "Orin", "to": "Maris", "trust": -2, "fondness": 0, "jealousy": 0, "guilt": 0}
+  ]
+}

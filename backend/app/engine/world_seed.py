@@ -15,6 +15,8 @@ from typing import Optional
 from app.agents import Agent
 from app.engine.events import Event
 from app.models.memory import Memory, Thread
+from app.models.narrative import Headline
+from app.models.world import SeedEvent, WorldChange
 
 logger = logging.getLogger("echoworld.world")
 
@@ -28,7 +30,7 @@ class WorldSeedMixin:
     llm: object  # LLMClient
     event_bus: object  # EventBus
     agents: list[Agent]
-    seed_events: list[dict]
+    seed_events: list[SeedEvent]
     tick: int
 
     # ------------------------------------------------------------------
@@ -64,8 +66,8 @@ class WorldSeedMixin:
     async def _inject_seed_event(self) -> None:
         """Auto-inject a random seed event from the seed library."""
         ev = random.choice(self.seed_events)
-        desc = ev.get("desc", "")
-        affected = ev.get("affected", []) or []
+        desc = ev.desc
+        affected = ev.affected
         name_set = {a.name for a in self.agents}
         applied: list[str] = []
         for n in affected:
@@ -99,16 +101,16 @@ class WorldSeedMixin:
     # World state change parsing (rule-based)
     # ------------------------------------------------------------------
 
-    def _parse_world_changes(self, desc: str) -> list[dict]:
+    def _parse_world_changes(self, desc: str) -> list[WorldChange]:
         """Rule-track: extract (actor, kind, reason) from desc.
 
         Each agent name is checked against status keywords with priority:
-        dead > unconscious > missing. First match wins per actor.
+        dead > unconscious > missing. First match wins per agent.
         """
         if not desc:
             return []
         seen_actors: set[str] = set()
-        changes: list[dict] = []
+        changes: list[WorldChange] = []
         for a in self.agents:
             if not a.name or a.name in seen_actors:
                 continue
@@ -116,11 +118,11 @@ class WorldSeedMixin:
                 continue
             for pat, status in self._STATUS_RULES:
                 if re.search(pat, desc):
-                    changes.append({
-                        "actor": a.name,
-                        "kind": status,
-                        "reason": desc[:60],
-                    })
+                    changes.append(WorldChange(
+                        actor=a.name,
+                        kind=status,
+                        reason=desc[:60],
+                    ))
                     seen_actors.add(a.name)
                     break
         return changes
@@ -155,67 +157,73 @@ class WorldSeedMixin:
         affected = affected[:5]
 
         # Rule-track: world changes
-        world_changes: list[dict] = self._parse_world_changes(desc)
+        world_changes: list[WorldChange] = self._parse_world_changes(desc)
 
-        # LLM track: fallback when rule-track yields nothing
+        # LLM track: fallback when rule-track yields nothing (retry 1x)
         if not world_changes and self.agents:
-            try:
-                names_hint = "、".join(a.name for a in self.agents[:8])
-                sem_sys = (
-                    "你是一个世界事件解析器。给定一段中文文本，"
-                    "判断其中是否有【角色】发生【死亡/昏迷/失踪】之一的变化。"
-                    "严格返回 JSON：{\"world_changes\":["
-                    "{\"actor\":\"角色名\",\"kind\":\"dead|unconscious|missing\",\"reason\":\"≤30字\"}"
-                    "]}，没有则返回 {\"world_changes\":[]}。"
-                )
-                sem_usr = f"已知角色：{names_hint}\n\n文本：{desc}\n\n仅按 schema 输出 JSON。"
-                data, _u = await asyncio.wait_for(
-                    self.llm.chat_json(sem_sys, sem_usr, kind="extract"),
-                    timeout=15.0,
-                )
-                if isinstance(data, dict):
-                    raw_changes = data.get("world_changes") or []
-                    if isinstance(raw_changes, list):
-                        valid_names = {a.name for a in self.agents}
-                        for ch in raw_changes[:5]:
-                            if not isinstance(ch, dict):
-                                continue
-                            actor = str(ch.get("actor", "")).strip()
-                            kind = str(ch.get("kind", "")).strip().lower()
-                            if actor not in valid_names:
-                                continue
-                            if kind not in ("dead", "unconscious", "missing"):
-                                continue
-                            world_changes.append({
-                                "actor": actor,
-                                "kind": kind,
-                                "reason": str(ch.get("reason", desc))[:60],
-                            })
-            except Exception as e:
-                logger.debug(f"inject_player_seed LLM 抽取失败（静默回退）: {e}")
+            for attempt in range(2):
+                try:
+                    names_hint = "、".join(a.name for a in self.agents[:8])
+                    sem_sys = (
+                        "你是一个世界事件解析器。给定一段中文文本，"
+                        "判断其中是否有【角色】发生【死亡/昏迷/失踪】之一的变化。"
+                        "严格返回 JSON：{\"world_changes\":["
+                        "{\"actor\":\"角色名\",\"kind\":\"dead|unconscious|missing\",\"reason\":\"≤30字\"}"
+                        "]}，没有则返回 {\"world_changes\":[]}。"
+                    )
+                    sem_usr = f"已知角色：{names_hint}\n\n文本：{desc}\n\n仅按 schema 输出 JSON。"
+                    data, _u = await asyncio.wait_for(
+                        self.llm.chat_json(sem_sys, sem_usr, kind="extract"),
+                        timeout=15.0,
+                    )
+                    if isinstance(data, dict):
+                        raw_changes = data.get("world_changes") or []
+                        if isinstance(raw_changes, list):
+                            valid_names = {a.name for a in self.agents}
+                            for ch in raw_changes[:5]:
+                                if not isinstance(ch, dict):
+                                    continue
+                                actor = str(ch.get("actor", "")).strip()
+                                kind = str(ch.get("kind", "")).strip().lower()
+                                if actor not in valid_names:
+                                    continue
+                                if kind not in ("dead", "unconscious", "missing"):
+                                    continue
+                                world_changes.append(WorldChange(
+                                    actor=actor,
+                                    kind=kind,
+                                    reason=str(ch.get("reason", desc))[:60],
+                                ))
+                    break  # success
+                except Exception as e:
+                    if attempt == 0:
+                        logger.debug(f"[SEED] inject_player_seed LLM attempt 1 fail, retrying: {e}")
+                    else:
+                        logger.debug(f"[SEED] inject_player_seed LLM attempt 2 fail, fallback to rule-only: {e}")
+                    break
 
         # Apply status changes
         for ch in world_changes:
-            actor_name = ch["actor"]
+            actor_name = ch.actor
             target_agent = next((a for a in self.agents if a.name == actor_name), None)
             if not target_agent:
                 continue
-            target_agent.status = ch["kind"]  # type: ignore[assignment]
-            target_agent.death_reason = ch["reason"]
+            target_agent.status = ch.kind  # type: ignore[assignment]
+            target_agent.death_reason = ch.reason
             target_agent.status_changed_tick = self.tick
             target_agent.add_memory(Memory(
                 tick=self.tick, kind="seed",
-                content=f"[最后一笔] {ch['reason']}",
+                content=f"[最后一笔] {ch.reason}",
                 importance=10,
             ))
-            kind_zh = {"dead": "死了", "unconscious": "昏迷", "missing": "失踪"}.get(ch["kind"], ch["kind"])
+            kind_zh = {"dead": "死了", "unconscious": "昏迷", "missing": "失踪"}.get(ch.kind, ch.kind)
             for a in self.agents:
                 if not a.is_alive() or a.name == actor_name:
                     continue
                 rel = a.get_or_init_relation(actor_name)
                 if rel.intensity() >= 3:
                     a.threads.append(Thread(
-                        desc=f"{actor_name} {kind_zh}了（{ch['reason']}），我还不能接受",
+                        desc=f"{actor_name} {kind_zh}了（{ch.reason}），我还不能接受",
                         target=actor_name,
                         weight=9,
                     ))
@@ -248,21 +256,21 @@ class WorldSeedMixin:
                 "affected": affected,
                 "source": "player",
                 "effects": effects,
-                "world_changes": world_changes,
+                "world_changes": [ch.model_dump() for ch in world_changes],
             },
         ))
 
         # Publish world_state_change events (one per change)
         for ch in world_changes:
-            kind_zh = {"dead": "死亡", "unconscious": "昏迷", "missing": "失踪"}.get(ch["kind"], ch["kind"])
+            kind_zh = {"dead": "死亡", "unconscious": "昏迷", "missing": "失踪"}.get(ch.kind, ch.kind)
             await self.event_bus.publish(Event(
                 tick=self.tick, kind="world_state_change",
-                actor=ch["actor"],
-                text=f"⚡ {ch['actor']} {kind_zh}：{ch['reason']}",
+                actor=ch.actor,
+                text=f"⚡ {ch.actor} {kind_zh}：{ch.reason}",
                 payload={
-                    "actor": ch["actor"],
-                    "kind": ch["kind"],
-                    "reason": ch["reason"],
+                    "actor": ch.actor,
+                    "kind": ch.kind,
+                    "reason": ch.reason,
                     "severity": "high",
                     "desc": desc,
                     "effects": effects,
@@ -274,7 +282,7 @@ class WorldSeedMixin:
         # Broadcast to all alive agents
         if world_changes:
             broadcast_text = "；".join(
-                f"{ch['actor']} {ch['kind']}（{ch['reason']}）" for ch in world_changes
+                f"{ch.actor} {ch.kind}（{ch.reason}）" for ch in world_changes
             )
         else:
             broadcast_text = desc
@@ -300,7 +308,7 @@ class WorldSeedMixin:
             "affected": affected,
             "tick": self.tick,
             "effects": effects,
-            "world_changes": world_changes,
+            "world_changes": [ch.model_dump() for ch in world_changes],
         }
 
     # ------------------------------------------------------------------
@@ -318,8 +326,8 @@ class WorldSeedMixin:
             try:
                 await self.event_bus.publish(Event(
                     tick=self.tick, kind="narrative",
-                    text=f"📰 {h.get('headline', '?')}（drama={h.get('drama', 0)}）",
-                    payload=h,
+                    text=f"📰 {h.headline}（drama={h.drama}）",
+                    payload=h.model_dump(),
                 ))
             except Exception as e:
                 logger.warning(f"narrative publish fail: {e}")

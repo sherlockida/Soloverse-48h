@@ -1,0 +1,23 @@
+{
+  "theme": "space",
+  "story_background": "深空中的第 7 号研究站，与地球失联已经 47 天。氧气还剩 60 天，补给船迟迟未到。站内的 8 名成员各自藏着秘密 — 有人在破坏通讯设备，有人在囤积食物，有人在私下进行违禁实验。信任正在以比氧气更快的速度消耗。",
+  "places": ["指挥舱", "实验室", "生态舱", "生活区", "引擎室", "观测台"],
+  "agents": [
+    {"name": "Alex", "role": "scientist", "emoji": "👨‍🔬", "persona": "首席研究员，冷静到近乎冷酷。所有实验数据都锁在自己的终端里。", "voice": "用词精准，从不废话，问就是 'data shows'。", "goals": ["完成关键实验", "隐瞒实验的真实性质"], "location": "实验室", "color_palette": {"skin": "#e8d4b8", "hair": "#2a2a3a", "clothes": "#ffffff", "eyes": "#4a6a8a", "accessory": "#4a9eff"}, "threads": [{"desc": "实验出了致命事故，不能让别人知道", "target": "Nova", "weight": 9}]},
+    {"name": "Nova", "role": "engineer", "emoji": "👩‍🔧", "persona": "站内工程师，修过每一条管道和电路。知道站内所有秘密通道。", "voice": "干脆利落，会用工具比喻人。", "goals": ["修复通讯系统", "找到破坏者"], "location": "引擎室", "color_palette": {"skin": "#c8956a", "hair": "#1a1a2a", "clothes": "#4a5a6a", "eyes": "#6a4a2a", "accessory": "#ff6a2a"}, "threads": [{"desc": "怀疑有人在故意破坏通讯设备", "target": "Alex", "weight": 8}]},
+    {"name": "Zara", "role": "medic", "emoji": "👩‍⚕️", "persona": "站内医生，曾是军医。包里永远多带一管镇静剂。", "voice": "平静的语调下藏着警觉，总在观察。", "goals": ["维持组员健康", "找出潜在的暴力风险者"], "location": "生活区", "color_palette": {"skin": "#8b6b4a", "hair": "#0a0a1a", "clothes": "#3a6a5a", "eyes": "#4a8a6a", "accessory": "#c0392b"}, "threads": [{"desc": "发现 Nex 的心率数据异常，像在隐瞒什么", "target": "Nex", "weight": 7}]},
+    {"name": "Nex", "role": "pilot", "emoji": "👨‍✈️", "persona": "前星际货船驾驶员，喜欢赌博和讲冷笑话。但他的飞行日志里有太多空白页。", "voice": "话多，会用太空黑话，关键时刻突然沉默。", "goals": ["活着回到地球", "保守飞行日志的秘密"], "location": "指挥舱", "color_palette": {"skin": "#d4a080", "hair": "#3a3a1a", "clothes": "#2a4a6a", "eyes": "#2a6a8a", "accessory": "#8b6914"}, "threads": [{"desc": "最后那次飞行中看到了不该看的东西", "target": null, "weight": 9}]},
+    {"name": "Ivy", "role": "botanist", "emoji": "👩‍🌾", "persona": "生态舱管理员，和植物说话的时间比跟人多。舱里的氧气植物是她唯一在乎的东西。", "voice": "温柔但固执，会为了一株枯叶较真。", "goals": ["保护生态舱", "培育出能在外太空生存的种子"], "location": "生态舱", "color_palette": {"skin": "#f0d4b0", "hair": "#4a6a3a", "clothes": "#3a6a2a", "eyes": "#3a8a3a", "accessory": "#6aaa4a"}, "threads": [{"desc": "生态舱的植物被偷过三次", "target": "Alex", "weight": 6}]},
+    {"name": "Kael", "role": "security", "emoji": "👮", "persona": "站内安保人员，寡言少语，每天定时巡查六次。他的配枪里有五发空弹。", "voice": "命令式短句，偶尔泄露一丝疲惫。", "goals": ["维持秩序", "保护弱者"], "location": "指挥舱", "color_palette": {"skin": "#6b4a2a", "hair": "#0a0a0a", "clothes": "#1a1a2a", "eyes": "#2a2a4a", "accessory": "#8a8a9a"}, "threads": [{"desc": "丢了记录全员心理评估的平板", "target": "Zara", "weight": 7}]},
+    {"name": "Ryn", "role": "technician", "emoji": "👨‍💻", "persona": "通讯技术员，社交恐惧，只和自己的 AI 助手聊天。但他能截获所有站内通讯。", "voice": "含糊不清，句子之间大段沉默，但打字飞快。", "goals": ["恢复地球通讯", "暗中监视所有人"], "location": "观测台", "color_palette": {"skin": "#e0c8a0", "hair": "#6a5a3a", "clothes": "#2a2a4a", "eyes": "#4a4a8a", "accessory": "#2a8a4a"}, "threads": [{"desc": "截获到一段加密信号，来源在站内", "target": "Nex", "weight": 8}]}
+  ],
+  "relations": [
+    {"from": "Alex", "to": "Nova", "trust": -3, "fondness": 0, "jealousy": 0, "guilt": 5},
+    {"from": "Nova", "to": "Alex", "trust": -4, "fondness": -1, "jealousy": 0, "guilt": 0},
+    {"from": "Zara", "to": "Kael", "trust": 4, "fondness": 3, "jealousy": 0, "guilt": 0},
+    {"from": "Nex", "to": "Ryn", "trust": -2, "fondness": 0, "jealousy": 0, "guilt": 0},
+    {"from": "Ivy", "to": "Alex", "trust": -3, "fondness": -2, "jealousy": 0, "guilt": 0},
+    {"from": "Kael", "to": "Zara", "trust": 3, "fondness": 2, "jealousy": 0, "guilt": 0},
+    {"from": "Ryn", "to": "Nex", "trust": -1, "fondness": 0, "jealousy": 0, "guilt": 0}
+  ]
+}

@@ -1,7 +1,7 @@
 """硬工具（状态变更）：talk / move / work。
 
 这些工具设置 agent.pending_action；世界 apply 阶段统一执行；最多 1 个。
-每个 tool 是一个 async function(agent, world, **args) -> ToolResult dict。
+每个 tool 是一个 async function(agent, world, **args) -> ToolResult。
 同时包含 TOOL_REGISTRY 和 dispatch_tool 统一派发逻辑。
 """
 from __future__ import annotations
@@ -14,12 +14,16 @@ from app.agents import Action
 from app.agents.tools.soft_tools import (
     SOFT_TOOLS,
     _build_tool_payload,
+    _result_to_payload_dict,
     tool_observe,
     tool_recall,
+)
+from app.agents.tools.soft_tools_extra import (
     tool_introspect,
     tool_plan,
 )
 from app.engine.events import Event
+from app.models.tools import ToolResult
 
 logger = logging.getLogger("echoworld.tools")
 
@@ -45,7 +49,7 @@ async def tool_talk(
     draft: str = "",
     parent_thought: str = "",
     **_kw,
-) -> dict:
+) -> ToolResult:
     """记录 talk 意图。真正的对话由 world 的 pair-up 阶段统一处理。
 
     talk 是硬工具：不在这里 publish tool_call 事件（避免与后续的 talk SSE 重复）。
@@ -55,17 +59,21 @@ async def tool_talk(
     target = (target or "").strip()
     intent = (intent or "").strip() or "试探"
     if not target:
-        return {"ok": False, "error": "talk: target 不能为空"}
+        return ToolResult(ok=False, error="talk: target 不能为空")
     target_agent = next((a for a in world.agents if a.name == target), None)
     if target_agent is None:
-        return {"ok": False, "error": f"talk: 没找到 {target}"}
+        return ToolResult(ok=False, error=f"talk: 没找到 {target}")
     if target_agent.location != agent.location:
-        return {"ok": False, "error": f"talk: {target} 不在你身边"}
+        return ToolResult(ok=False, error=f"talk: {target} 不在你身边")
     agent.pending_action = Action(kind="talk", target=target, reason=draft or intent)
     agent.pending_talk_intent = intent
     agent.pending_talk_draft = draft or ""
     latency_ms = int((_time.time() - t0) * 1000)
     brief = f"will talk to {target} (intent={intent})"
+    result = ToolResult(
+        ok=True, kind="talk_intent",
+        data={"target": target, "intent": intent},
+    )
 
     await world.event_bus.publish(
         Event(
@@ -77,7 +85,7 @@ async def tool_talk(
             payload=_build_tool_payload(
                 tool="talk",
                 args={"target": target, "intent": intent, "draft": draft},
-                result={"ok": True, "kind": "talk_intent", "target": target, "intent": intent},
+                result=_result_to_payload_dict(result),
                 latency_ms=latency_ms,
                 brief=brief,
                 actor_emoji=agent.emoji,
@@ -86,21 +94,21 @@ async def tool_talk(
             ),
         )
     )
-    return {"ok": True, "kind": "talk_intent", "target": target, "intent": intent}
+    return result
 
 
 async def tool_move(
     agent, world, place: str = "", parent_thought: str = "", **_kw
-) -> dict:
+) -> ToolResult:
     """记录 move 意图。world 的 apply 阶段会调 _apply_action 实际移动并发 move 事件。"""
     t0 = _time.time()
     place = (place or "").strip()
     if not place:
-        return {"ok": False, "error": "move: place 不能为空"}
+        return ToolResult(ok=False, error="move: place 不能为空")
     if place not in world.places:
-        return {"ok": False, "error": f"move: 未知地点 {place}"}
+        return ToolResult(ok=False, error=f"move: 未知地点 {place}")
     if place == agent.location:
-        return {"ok": False, "error": f"move: 已在 {place}"}
+        return ToolResult(ok=False, error=f"move: 已在 {place}")
     agent.pending_action = Action(
         kind="move",
         target=place,
@@ -108,6 +116,7 @@ async def tool_move(
     )
     latency_ms = int((_time.time() - t0) * 1000)
     brief = f"will move {agent.location} -> {place}"
+    result = ToolResult(ok=True, kind="move_intent", data={"place": place})
 
     await world.event_bus.publish(
         Event(
@@ -119,7 +128,7 @@ async def tool_move(
             payload=_build_tool_payload(
                 tool="move",
                 args={"place": place},
-                result={"ok": True, "kind": "move_intent", "place": place},
+                result=_result_to_payload_dict(result),
                 latency_ms=latency_ms,
                 brief=brief,
                 actor_emoji=agent.emoji,
@@ -128,17 +137,18 @@ async def tool_move(
             ),
         )
     )
-    return {"ok": True, "kind": "move_intent", "place": place}
+    return result
 
 
 async def tool_work(
     agent, world, focus: str = "", parent_thought: str = "", **_kw
-) -> dict:
+) -> ToolResult:
     """记录 work 意图。world 的 apply 阶段会发 thought 事件。"""
     t0 = _time.time()
     agent.pending_action = Action(kind="work", target=agent.location, reason=focus or "")
     latency_ms = int((_time.time() - t0) * 1000)
     brief = f"will work on: {focus[:18] or '手头活'}"
+    result = ToolResult(ok=True, kind="work_intent", data={"focus": focus})
 
     await world.event_bus.publish(
         Event(
@@ -149,7 +159,7 @@ async def tool_work(
             payload=_build_tool_payload(
                 tool="work",
                 args={"focus": focus},
-                result={"ok": True, "kind": "work_intent", "focus": focus},
+                result=_result_to_payload_dict(result),
                 latency_ms=latency_ms,
                 brief=brief,
                 actor_emoji=agent.emoji,
@@ -158,7 +168,7 @@ async def tool_work(
             ),
         )
     )
-    return {"ok": True, "kind": "work_intent", "focus": focus}
+    return result
 
 
 # ---------- Registry ----------
@@ -185,7 +195,7 @@ async def dispatch_tool(
     args: Optional[dict] = None,
     *,
     parent_thought: str = "",
-) -> dict:
+) -> ToolResult:
     """统一派发。未知工具 / 异常都返回 ok=False。
 
     parent_thought 是 agent.think_and_act 在本 tick 已发出的 thought 头 40 字，
@@ -193,7 +203,7 @@ async def dispatch_tool(
     """
     fn = TOOL_REGISTRY.get(name)
     if fn is None:
-        return {"ok": False, "error": f"unknown tool: {name}"}
+        return ToolResult(ok=False, error=f"unknown tool: {name}")
     args = args if isinstance(args, dict) else {}
     try:
         return await fn(agent, world, parent_thought=parent_thought, **args)
@@ -202,12 +212,12 @@ async def dispatch_tool(
         try:
             return await fn(agent, world, parent_thought=parent_thought)
         except Exception as ee:
-            return {
-                "ok": False,
-                "error": f"{name} fail: {type(ee).__name__}: {str(ee)[:120]}",
-            }
+            return ToolResult(
+                ok=False,
+                error=f"{name} fail: {type(ee).__name__}: {str(ee)[:120]}",
+            )
     except Exception as e:
-        return {
-            "ok": False,
-            "error": f"{name} fail: {type(e).__name__}: {str(e)[:120]}",
-        }
+        return ToolResult(
+            ok=False,
+            error=f"{name} fail: {type(e).__name__}: {str(e)[:120]}",
+        )

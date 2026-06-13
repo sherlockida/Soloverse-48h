@@ -63,7 +63,7 @@ class WorldStateMixin:
             "scene_id": self.scene_id,
             "theme": self.theme,
             "story_background": self.story_background,
-            "active_headlines": self.narrative.active_headlines[-10:],
+            "active_headlines": [h.model_dump() for h in self.narrative.active_headlines[-10:]],
             "tick_interval": self.tick_interval,
             "player_avatar": self.player_avatar,
         }

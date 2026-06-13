@@ -1,0 +1,44 @@
+# 种子事件库：10 条预制扰动
+# 每 SEED_EVENT_EVERY_N_TICKS（默认 5）以 SEED_EVENT_PROBABILITY（默认 30%）概率随机抽 1 条
+# 注入方式：被影响的 agent 的 primed_memory 写入该事件描述，下一 tick 必定有反应
+
+events:
+  - desc: "广场上出现一封没有署名的情书，字迹娟秀"
+    affected: [Carol, Dan, Alice]
+    weight: 8
+
+  - desc: "Frank 的谷仓夜里又起了小火，被巡夜人及时扑灭，没人看清纵火者"
+    affected: [Frank, Bob, Alice]
+    weight: 9
+
+  - desc: "一个穿黑斗篷的外乡人到访酒馆，反复打听 Bob 的下落"
+    affected: [Bob, Eve, Carol]
+    weight: 8
+
+  - desc: "Grace 在民居后院捡到一枚带血的铜纽扣，款式很旧"
+    affected: [Grace, Bob, Frank]
+    weight: 8
+
+  - desc: "镇上的供水井突然断流，水位看起来一夜之间消失"
+    affected: [Eve, Frank, Henry]
+    weight: 6
+
+  - desc: "Carol 的杂货店账本被人翻动过，少了几页"
+    affected: [Carol, Bob, Dan]
+    weight: 7
+
+  - desc: "Dan 在画室门口贴出一幅未完成的画像，画中人神似 Alice，引人围观"
+    affected: [Dan, Alice, Carol]
+    weight: 8
+
+  - desc: "Henry 在广场喃喃自语，反复提到'火'和'孩子'两个词"
+    affected: [Henry, Grace, Frank]
+    weight: 7
+
+  - desc: "酒馆深夜传出 Eve 和 Bob 激烈争吵的声音，第二天 Eve 不肯说原因"
+    affected: [Eve, Bob, Carol]
+    weight: 7
+
+  - desc: "下了一夜大雨，第二天 Frank 家门口发现一串陌生脚印，从农场延伸到画室方向"
+    affected: [Frank, Grace, Dan]
+    weight: 6

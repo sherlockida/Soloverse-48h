@@ -5,6 +5,7 @@ import { API } from './api.js';
 import { SSEConnection } from './sse.js';
 import { CanvasEngine, SceneRenderer } from './renderer/renderer.js';
 import { renderRoom } from './renderer/room.js';
+import { ROOM_COLS, ROOM_ROWS, TILE } from './renderer/room_layouts.js';
 import { SceneWizard } from './wizard.js';
 
 // ====== Shared utilities (exported) ======

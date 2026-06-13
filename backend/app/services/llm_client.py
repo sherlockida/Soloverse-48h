@@ -7,10 +7,11 @@ import inspect
 import json
 import logging
 import os
-import re
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+from app.models.llm import HealthStats
+from app.services.llm_json import _safe_parse_json, _strip_fences
 from app.services.mock_gen_output import _MockBackend
 from app.services.providers import (
     PROVIDER_REGISTRY,
@@ -19,74 +20,7 @@ from app.services.providers import (
 )
 
 logger = logging.getLogger("echoworld.llm")
-# 零使用量统计（mock 兜底 / 超时 / 全链失败 共用）
-_NULL_USAGE = {
-    "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "latency_ms": 0,
-}
-
-
-# --- JSON 解析容错 ---
-def _strip_fences(s: str) -> str:
-    s = s.strip()
-    if s.startswith("```"):
-        m = re.match(r"^```[a-zA-Z]*\n?(.*?)```\s*$", s, re.DOTALL)
-        if m:
-            s = m.group(1).strip()
-        else:
-            s = s.strip("`").strip()
-    return s
-
-def _safe_parse_json(text: str) -> Any:
-    if not text:
-        return None
-    text = _strip_fences(text)
-    for pat in (
-        r"好的[，,]\s*以下是[\w一二三]*[格式的]*JSON[格式]*[回复回答]*[：:]\s*",
-        r"以下是[\w一二三]*JSON[格式]*[：:]\s*",
-        r"好的[，,]\s*[回复回答]*[：:]\s*",
-        r"当然[，,]\s*[回复回答]*[：:]\s*",
-    ):
-        text = re.sub(r"^" + pat, "", text, flags=re.IGNORECASE)
-    for pat in (
-        r"[，,]*\s*希望这[个些对您]*[有帮]*助[。！]*\s*$",
-        r"[，,]*\s*如果[还]*[有需要]*[，,]\s*[请]*[告]*诉我[。！]*\s*$",
-    ):
-        text = re.sub(pat + r"$", "", text, flags=re.IGNORECASE)
-    text = text.strip()
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-    for opener, closer in (("{", "}"), ("[", "]")):
-        start = text.find(opener)
-        if start == -1:
-            continue
-        depth = 0
-        in_string = False
-        escape = False
-        for i in range(start, len(text)):
-            c = text[i]
-            if escape:
-                escape = False
-                continue
-            if c == '\\':
-                escape = True
-                continue
-            if c == '"' and not in_string:
-                in_string = True
-            elif c == '"' and in_string:
-                in_string = False
-            elif not in_string:
-                if c == opener:
-                    depth += 1
-                elif c == closer:
-                    depth -= 1
-                    if depth == 0:
-                        try:
-                            return json.loads(text[start:i + 1])
-                        except json.JSONDecodeError:
-                            break
-    return None
+_NULL_USAGE = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "latency_ms": 0}  # mock/超时/全链失败共用
 
 
 class LLMClient:
@@ -118,7 +52,8 @@ class LLMClient:
         self.chain: list[str] = []
         self._backends: dict[str, Any] = {}
         self._breakers: dict[str, _CircuitBreaker] = {}
-        self.health: dict[str, dict[str, Any]] = {}
+        self.health: dict[str, HealthStats] = {}
+        self._provider_extra: dict[str, dict[str, Any]] = {}
 
         for name in chain:
             backend = self._build(name)
@@ -127,10 +62,10 @@ class LLMClient:
             self.chain.append(name)
             self._backends[name] = backend
             self._breakers[name] = _CircuitBreaker(circuit_fail, circuit_cool)
-            self.health[name] = {
-                "calls": 0, "successes": 0, "failures": 0,
-                "last_error": "", "circuit_open": False,
-                "tokens_total": 0, "last_tokens": 0, "last_latency_ms": 0,
+            self.health[name] = HealthStats()
+            self._provider_extra[name] = {
+                "successes": 0, "circuit_open": False,
+                "tokens_total": 0, "last_tokens": 0,
             }
 
         self.on_provider_switch: Optional[Callable[[str, dict], Any]] = None
@@ -152,17 +87,16 @@ class LLMClient:
         name = name.lower()
         if name == "mock":
             return _MockBackend(self.cache_path)
-        meta = PROVIDER_REGISTRY.get(name)
-        if not meta:
+        cfg = PROVIDER_REGISTRY.get(name)
+        if not cfg:
             logger.warning(f"未知 provider 已跳过: {name}")
             return None
-        key_env, base_env, base_default, model_env, model_default, allow_no_key = meta
-        key = os.getenv(key_env, "") if key_env else ""
-        if not key and not allow_no_key:
-            logger.info(f"provider [{name}] 缺 {key_env}，跳过")
+        key = os.getenv(cfg.key_env, "") if cfg.key_env else ""
+        if not key and not cfg.allow_no_key:
+            logger.info(f"provider [{name}] 缺 {cfg.key_env}，跳过")
             return None
-        base = os.getenv(base_env, base_default)
-        model = os.getenv(model_env, model_default)
+        base = os.getenv(cfg.base_url_env, cfg.default_base_url)
+        model = os.getenv(cfg.model_env, cfg.default_model)
         try:
             backend = _OpenAIBackend(key, base, model)
             logger.info(f"provider [{name}] 已装载: base={base}, model={model}")
@@ -192,9 +126,15 @@ class LLMClient:
         if self.on_provider_switch is None:
             return
         try:
+            merged: dict[str, dict[str, Any]] = {}
+            for k, hs in self.health.items():
+                d = hs.model_dump()
+                if k in self._provider_extra:
+                    d.update(self._provider_extra[k])
+                merged[k] = d
             res = self.on_provider_switch(name, {
                 "chain": list(self.chain), "previous": prev,
-                "health": {k: dict(v) for k, v in self.health.items()},
+                "health": merged,
             })
             if inspect.isawaitable(res):
                 await res
@@ -253,29 +193,30 @@ class LLMClient:
             for name in self.chain:
                 breaker = self._breakers[name]
                 if not breaker.allow():
-                    self.health[name]["circuit_open"] = True
+                    self._provider_extra[name]["circuit_open"] = True
                     continue
-                self.health[name]["calls"] += 1
+                self.health[name].calls += 1
                 try:
                     result, usage = await self._call_backend(name, self._backends[name],
                                                               system, user, kind)
                 except Exception as e:
                     breaker.record_failure()
-                    h = self.health[name]
-                    h["failures"] += 1
-                    h["last_error"] = f"{type(e).__name__}: {str(e)[:120]}"
-                    h["circuit_open"] = breaker.is_open
+                    hs = self.health[name]
+                    hs.failures += 1
+                    hs.last_error = f"{type(e).__name__}: {str(e)[:120]}"
+                    self._provider_extra[name]["circuit_open"] = breaker.is_open
                     logger.warning(f"[{name}] dropped; next in chain")
                     continue
                 breaker.record_success()
-                h = self.health[name]
-                h["successes"] += 1
-                h["circuit_open"] = False
+                hs = self.health[name]
+                extra = self._provider_extra[name]
+                extra["successes"] += 1
+                extra["circuit_open"] = False
                 total_t = int(usage.get("total_tokens", 0) or 0)
                 latency = int(usage.get("latency_ms", 0) or 0)
-                h["last_tokens"] = total_t
-                h["last_latency_ms"] = latency
-                h["tokens_total"] = int(h.get("tokens_total", 0)) + total_t
+                hs.last_latency_ms = latency
+                extra["last_tokens"] = total_t
+                extra["tokens_total"] = int(extra.get("tokens_total", 0)) + total_t
                 self.totals["calls"] += 1
                 self.totals["tokens"] += total_t
                 if name != "mock":
@@ -289,11 +230,19 @@ class LLMClient:
             self._sem.release()
 
     def get_health(self) -> dict[str, Any]:
+        providers_merged: dict[str, dict[str, Any]] = {}
         for name, br in self._breakers.items():
-            self.health[name]["circuit_open"] = br.is_open
-            self.health[name]["consecutive_failures"] = br.consecutive_failures
+            hs = self.health[name]
+            d = hs.model_dump()
+            extra = self._provider_extra.get(name, {})
+            d["successes"] = extra.get("successes", 0)
+            d["circuit_open"] = br.is_open
+            d["consecutive_failures"] = br.consecutive_failures
+            d["tokens_total"] = extra.get("tokens_total", 0)
+            d["last_tokens"] = extra.get("last_tokens", 0)
+            providers_merged[name] = d
         return {
             "chain": list(self.chain), "active": self._last_active_provider,
-            "providers": {k: dict(v) for k, v in self.health.items()},
+            "providers": providers_merged,
             "totals": dict(self.totals),
         }

@@ -8,17 +8,19 @@ import time as _time
 from typing import Any, Optional
 
 from app.engine.events import Event
+from app.models.tools import ToolResult
 
 from app.agents.tools.soft_tools import (
     _MAX_PAYLOAD_BYTES,
     _build_tool_payload,
     _truncate_for_payload,
+    _result_to_payload_dict,
 )
 
 
 async def tool_introspect(
     agent, world, parent_thought: str = "", **_kw
-) -> dict:
+) -> ToolResult:
     """内省 -- 把 agent 的核心状态打成 dict 返回给 LLM 自查。不产生持久副作用。"""
     t0 = _time.time()
     rels = []
@@ -51,7 +53,7 @@ async def tool_introspect(
         ],
         "primed": agent.primed_memory or "",
     }
-    result = {"ok": True, "kind": "introspect", "snapshot": snapshot}
+    result = ToolResult(ok=True, kind="introspect", data={"snapshot": snapshot})
     latency_ms = int((_time.time() - t0) * 1000)
     top_rel = rels[0] if rels else None
     if top_rel:
@@ -68,7 +70,7 @@ async def tool_introspect(
             payload=_build_tool_payload(
                 tool="introspect",
                 args={},
-                result=result,
+                result=_result_to_payload_dict(result),
                 latency_ms=latency_ms,
                 brief=brief,
                 actor_emoji=agent.emoji,
@@ -88,7 +90,7 @@ async def tool_plan(
     confidence: Optional[int] = None,
     parent_thought: str = "",
     **_kw,
-) -> dict:
+) -> ToolResult:
     """覆盖/合并短期 plan。steps 是 list[str] 或 list[{intent, status?}]。"""
     from app.agents import ShortTermPlan, PlanStep
 
@@ -128,13 +130,14 @@ async def tool_plan(
             pass
     plan.updated_tick = world.tick
 
-    result = {
-        "ok": True,
-        "kind": "plan",
-        "goal": plan.goal,
-        "step_count": len(plan.steps),
-        "confidence": plan.confidence,
-    }
+    result = ToolResult(
+        ok=True, kind="plan",
+        data={
+            "goal": plan.goal,
+            "step_count": len(plan.steps),
+            "confidence": plan.confidence,
+        },
+    )
     latency_ms = int((_time.time() - t0) * 1000)
     brief = f"goal: {plan.goal[:18] or '空'} / {len(plan.steps)} 步"
 
@@ -151,7 +154,7 @@ async def tool_plan(
                     "steps": steps if steps is not None else [],
                     "confidence": confidence,
                 },
-                result=result,
+                result=_result_to_payload_dict(result),
                 latency_ms=latency_ms,
                 brief=brief,
                 actor_emoji=agent.emoji,

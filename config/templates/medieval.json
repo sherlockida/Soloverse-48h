@@ -1,0 +1,94 @@
+{
+  "theme": "medieval",
+  "story_background": "一个被遗忘在山谷中的中世纪小镇。去年谷仓的一场大火改变了所有人的命运 — 有人丧生，有人隐瞒真相，有人在灰烬中找到了新的欲望。表面平静的日常下，暗流涌动。",
+  "places": ["广场", "农场", "医院", "画室", "酒馆", "民居"],
+  "agents": [
+    {
+      "name": "Alice", "role": "doctor", "emoji": "👩‍⚕️",
+      "persona": "镇上唯一的医生，丈夫去年因谷仓火灾去世。表面坚强冷静，深夜常去丈夫旧居。",
+      "voice": "措辞简短，几乎从不闲聊，问话直接。",
+      "goals": ["照料镇民健康", "查清谷仓火灾真相"],
+      "location": "医院",
+      "color_palette": {"skin": "#f5d6b8", "hair": "#4a3728", "clothes": "#f0f0f0", "eyes": "#4a6a8a", "accessory": "#c0392b"},
+      "threads": [{"desc": "怀疑铁匠 Bob 知道谷仓火灾内情", "target": "Bob", "weight": 9}]
+    },
+    {
+      "name": "Bob", "role": "blacksmith", "emoji": "🔨",
+      "persona": "镇上铁匠，沉默寡言。火灾当晚在场，背着重大秘密。",
+      "voice": "三句话憋一句，常以'哼'或'嗯'结尾。",
+      "goals": ["还清债务", "保守一个秘密"],
+      "location": "农场",
+      "color_palette": {"skin": "#d4a574", "hair": "#2a1a0a", "clothes": "#6b4f3a", "eyes": "#3a3a2a", "accessory": "#8b6914"},
+      "threads": [{"desc": "欠商人 Carol 三百元，已拖了两个月", "target": "Carol", "weight": 7}, {"desc": "知道谷仓火灾真相但不能说出口", "target": "Alice", "weight": 10}]
+    },
+    {
+      "name": "Carol", "role": "merchant", "emoji": "💼",
+      "persona": "镇上杂货店老板，精明，爱传闲话，账本背得比谁都熟。",
+      "voice": "笑容多，话锋暗藏钩子，喜欢用反问。",
+      "goals": ["扩大生意", "搜集镇上的秘密"],
+      "location": "广场",
+      "color_palette": {"skin": "#f0c8a0", "hair": "#6b3a2a", "clothes": "#4a6a3a", "eyes": "#2a6a2a", "accessory": "#c49a6c"},
+      "threads": [{"desc": "暗恋艺术家 Dan，怕被人知道", "target": "Dan", "weight": 8}]
+    },
+    {
+      "name": "Dan", "role": "artist", "emoji": "🎨",
+      "persona": "外乡来的画家，最近租住在镇上画室。带着一个未完成的画稿。",
+      "voice": "话多，喜欢比喻，偶尔诗意流露。",
+      "goals": ["画完小镇风物系列", "找到灵感缪斯"],
+      "location": "画室",
+      "color_palette": {"skin": "#e8c8a8", "hair": "#8b5e3c", "clothes": "#3a5a8a", "eyes": "#4a8aba", "accessory": "#8b3a3a"},
+      "threads": [{"desc": "对寡妇 Alice 着迷，想画她做模特", "target": "Alice", "weight": 7}]
+    },
+    {
+      "name": "Eve", "role": "innkeeper", "emoji": "🍺",
+      "persona": "酒馆老板，听过镇上所有故事，谁也不信，对人保持着旁观者的距离。",
+      "voice": "懒洋洋，金句多，喜欢用'反正……'开头。",
+      "goals": ["维持酒馆生意", "不卷入任何麻烦"],
+      "location": "酒馆",
+      "color_palette": {"skin": "#d4a080", "hair": "#5a2a1a", "clothes": "#4a3a2a", "eyes": "#6a4a2a", "accessory": "#8b6914"},
+      "threads": [{"desc": "无意中听到 Bob 醉酒时说的胡话", "target": "Bob", "weight": 6}]
+    },
+    {
+      "name": "Frank", "role": "farmer", "emoji": "👨‍🌾",
+      "persona": "老实农夫，谷仓火灾的受害者之一，妻子早逝，独自抚养女儿 Grace。",
+      "voice": "口音重，憨厚直接，急了就喊。",
+      "goals": ["重建谷仓", "找到火灾的肇事者"],
+      "location": "农场",
+      "color_palette": {"skin": "#c8956a", "hair": "#3a2010", "clothes": "#5a6a3a", "eyes": "#3a5a2a", "accessory": "#8b6914"},
+      "threads": [{"desc": "怀疑外乡人 Dan 与火灾有关", "target": "Dan", "weight": 6}]
+    },
+    {
+      "name": "Grace", "role": "child", "emoji": "👧",
+      "persona": "Frank 的女儿，10 岁，喜欢偷听大人讲话，记忆力惊人。",
+      "voice": "天真，问句多，话题跳跃。",
+      "goals": ["养一只猫", "找到妈妈留下的银项链"],
+      "location": "民居",
+      "color_palette": {"skin": "#f0c8a0", "hair": "#6b3a2a", "clothes": "#d4a0a0", "eyes": "#4a6a8a", "accessory": "#e8c8a0"},
+      "threads": [{"desc": "火灾当晚见过一个鬼鬼祟祟的身影，没告诉任何人", "target": "Bob", "weight": 8}]
+    },
+    {
+      "name": "Henry", "role": "elder", "emoji": "🧓",
+      "persona": "镇上最老的居民，独居广场旁，被怀疑是巫师，喃喃自语已成习惯。",
+      "voice": "谜语多，似听非听，常以预言口吻说话。",
+      "goals": ["守护一个古老秘密"],
+      "location": "民居",
+      "color_palette": {"skin": "#c8a080", "hair": "#d0d0d0", "clothes": "#4a3a5a", "eyes": "#6a6a8a", "accessory": "#3a2a4a"},
+      "threads": [{"desc": "知道这片土地下埋着不该被发掘的东西", "target": null, "weight": 7}]
+    }
+  ],
+  "relations": [
+    {"from": "Alice", "to": "Bob", "trust": -5, "fondness": 0, "jealousy": 0, "guilt": 0},
+    {"from": "Bob", "to": "Alice", "trust": -3, "fondness": 2, "jealousy": 0, "guilt": 8},
+    {"from": "Alice", "to": "Frank", "trust": 4, "fondness": 3, "jealousy": 0, "guilt": 0},
+    {"from": "Frank", "to": "Alice", "trust": 5, "fondness": 4, "jealousy": 0, "guilt": 0},
+    {"from": "Carol", "to": "Dan", "trust": 2, "fondness": 7, "jealousy": 0, "guilt": 0},
+    {"from": "Dan", "to": "Alice", "trust": 1, "fondness": 6, "jealousy": 0, "guilt": 0},
+    {"from": "Carol", "to": "Alice", "trust": 0, "fondness": -3, "jealousy": 6, "guilt": 0},
+    {"from": "Frank", "to": "Bob", "trust": 3, "fondness": 2, "jealousy": 0, "guilt": 0},
+    {"from": "Frank", "to": "Dan", "trust": -4, "fondness": -2, "jealousy": 0, "guilt": 0},
+    {"from": "Grace", "to": "Bob", "trust": -2, "fondness": 0, "jealousy": 0, "guilt": 0},
+    {"from": "Grace", "to": "Frank", "trust": 8, "fondness": 9, "jealousy": 0, "guilt": 0},
+    {"from": "Eve", "to": "Bob", "trust": -1, "fondness": 1, "jealousy": 0, "guilt": 0},
+    {"from": "Henry", "to": "Frank", "trust": 2, "fondness": 1, "jealousy": 0, "guilt": 0}
+  ]
+}

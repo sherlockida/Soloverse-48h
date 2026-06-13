@@ -7,7 +7,7 @@ origin/
 dev-log/
 docs/
 CLAUDE.md
-
+images/
 # ===== Python =====
 __pycache__/
 *.py[cod]

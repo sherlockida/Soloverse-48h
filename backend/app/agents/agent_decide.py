@@ -200,10 +200,10 @@ class AgentDecideMixin(AgentThinkMixin):
                 continue
             result = await dispatch_tool(name, self, world, args, parent_thought=parent_thought)
             observations.append({"call": call, "result": result})
-            if is_hard(name) and result.get("ok"):
+            if is_hard(name) and result.ok:
                 chosen = self.pending_action
                 break
-            if is_hard(name) and not result.get("ok"):
+            if is_hard(name) and not result.ok:
                 continue
 
         # 5) plan_patch 落地

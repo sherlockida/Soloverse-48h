@@ -1,7 +1,7 @@
 """软工具（只读）：observe / recall / introspect / plan。
 
 这些工具不消耗"硬动作"名额，仅产生 thought/observation。
-每个 tool 是一个 async function(agent, world, **args) -> ToolResult dict。
+每个 tool 是一个 async function(agent, world, **args) -> ToolResult。
 """
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ from typing import Any, Optional
 
 from app.engine.events import Event
 from app.models.memory import Memory
+from app.models.tools import ToolResult
 
 logger = logging.getLogger("echoworld.tools")
 
@@ -75,14 +76,28 @@ def _build_tool_payload(
 # ---------- 软工具实现 ----------
 
 
+def _result_to_payload_dict(r: ToolResult) -> dict:
+    """Flatten a ToolResult into a plain dict matching the old SSE payload structure.
+
+    Old: {"ok": True, "kind": "observe_agent", "seen": {...}}
+    New ToolResult.data carries {"seen": {...}}; kind is on the envelope.
+    We flatten so the payload 'result' field stays identical for the frontend.
+    """
+    out: dict[str, Any] = {"ok": r.ok, "kind": r.kind}
+    if r.error:
+        out["error"] = r.error
+    out.update(r.data)
+    return out
+
+
 async def tool_observe(
     agent, world, target: str = "", parent_thought: str = "", **_kw
-) -> dict:
+) -> ToolResult:
     """观察某人/某地。返回该 target 当前可见状态（位置、最后动作、相对关系）。"""
     t0 = _time.time()
     target = (target or "").strip()
     if not target:
-        return {"ok": False, "error": "observe: target 不能为空"}
+        return ToolResult(ok=False, error="observe: target 不能为空")
 
     # 先按角色名匹配
     other = None
@@ -111,7 +126,7 @@ async def tool_observe(
                 importance=2,
             )
         )
-        result = {"ok": True, "kind": "observe_agent", "seen": seen}
+        result = ToolResult(ok=True, kind="observe_agent", data={"seen": seen})
         latency_ms = int((_time.time() - t0) * 1000)
         brief = f"看到 {other.name} 在 {other.location}" + (
             "（同房间）" if seen["in_same_room"] else ""
@@ -126,7 +141,7 @@ async def tool_observe(
                 payload=_build_tool_payload(
                     tool="observe",
                     args={"target": other.name},
-                    result=result,
+                    result=_result_to_payload_dict(result),
                     latency_ms=latency_ms,
                     brief=brief,
                     actor_emoji=agent.emoji,
@@ -158,7 +173,7 @@ async def tool_observe(
                 importance=1,
             )
         )
-        result = {"ok": True, "kind": "observe_place", "seen": seen}
+        result = ToolResult(ok=True, kind="observe_place", data={"seen": seen})
         latency_ms = int((_time.time() - t0) * 1000)
         brief = f"{target} 有 {len(peers)} 人：" + (
             "、".join(peers[:3]) if peers else "空"
@@ -173,7 +188,7 @@ async def tool_observe(
                 payload=_build_tool_payload(
                     tool="observe",
                     args={"target": target},
-                    result=result,
+                    result=_result_to_payload_dict(result),
                     latency_ms=latency_ms,
                     brief=brief,
                     actor_emoji=agent.emoji,
@@ -184,12 +199,12 @@ async def tool_observe(
         )
         return result
 
-    return {"ok": False, "error": f"observe: 找不到目标 {target}"}
+    return ToolResult(ok=False, error=f"observe: 找不到目标 {target}")
 
 
 async def tool_recall(
     agent, world, query: str = "", k: int = 5, parent_thought: str = "", **_kw
-) -> dict:
+) -> ToolResult:
     """主动召回与 query 相关的记忆。命中条目会塞回 agent.last_recalled 供后续 reasoning 用。"""
     from app.services.recall import build_recall_query, recall as mem_recall
 
@@ -221,7 +236,7 @@ async def tool_recall(
     hit_texts = [m.short() for m in hits]
     agent.last_recalled = hit_texts
 
-    result = {"ok": True, "kind": "recall", "query": query, "hits": hit_texts}
+    result = ToolResult(ok=True, kind="recall", data={"query": query, "hits": hit_texts})
     latency_ms = int((_time.time() - t0) * 1000)
     if hit_texts:
         preview = "；".join(t[:18] for t in hit_texts[:2])
@@ -238,7 +253,7 @@ async def tool_recall(
             payload=_build_tool_payload(
                 tool="recall",
                 args={"query": query, "k": k},
-                result=result,
+                result=_result_to_payload_dict(result),
                 latency_ms=latency_ms,
                 brief=brief,
                 actor_emoji=agent.emoji,

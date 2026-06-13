@@ -1,346 +1,414 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-cn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EchoWorld — 涌现叙事多 Agent 像素社会模拟器</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EchoWorld — 涌现叙事像素模拟器</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
 
-  <!-- ========== LANDING VIEW ========== -->
+  <!-- ====== 落地页 ====== -->
   <div id="landing-view">
     <div class="landing-hero">
+      <h1 class="pixel-title">EchoWorld</h1>
+      <p class="pixel-subtitle">一个活着的像素世界 — 故事从社交混沌中涌现</p>
       <canvas id="landing-hero-canvas" class="hero-canvas" width="512" height="320"></canvas>
-      <h1 class="pixel-title">ECHOWORLD</h1>
-      <p class="pixel-subtitle">AI Native Emergent Narrative</p>
-      <p class="landing-desc">
-        创造一个世界，放入有灵魂的 AI 角色，<br>
-        故事从他们的社交碰撞中自己长出来。<br>
-        你旁观、干预，或者成为其中一员。
-      </p>
+      <p class="landing-desc">创造一个世界，放入有灵魂的角色，看他们会搞出什么事来。中途投下混沌的种子，观察涟漪如何扩散。</p>
     </div>
 
     <div class="theme-grid-landing">
-      <div class="theme-card featured" data-theme="medieval">
-        <span class="card-ribbon">推荐</span>
-        <canvas class="theme-card-preview" id="landing-preview-medieval" width="512" height="320"></canvas>
-        <div class="theme-card-label">🏘️ 中世纪小镇</div>
-        <div class="theme-card-desc">山谷小镇，火灾的秘密</div>
-      </div>
-      <div class="theme-card" data-theme="office">
-        <canvas class="theme-card-preview" id="landing-preview-office" width="512" height="320"></canvas>
+      <div class="theme-card featured" data-theme="office">
+        <span class="card-ribbon">🔥 现实释放</span>
+        <canvas class="theme-preview-canvas" id="landing-preview-office" width="200" height="120"></canvas>
         <div class="theme-card-label">🏢 办公室浮世绘</div>
-        <div class="theme-card-desc">裁员前夕的暗流</div>
+        <div class="theme-card-desc">裁员前夕的暗流：骂老板·追同事·泄露八卦</div>
       </div>
-      <div class="theme-card" data-theme="campus">
-        <canvas class="theme-card-preview" id="landing-preview-campus" width="512" height="320"></canvas>
+      <div class="theme-card featured" data-theme="campus">
+        <span class="card-ribbon">🎓 校园暗潮</span>
+        <canvas class="theme-preview-canvas" id="landing-preview-campus" width="200" height="120"></canvas>
         <div class="theme-card-label">🎓 大学暗潮</div>
-        <div class="theme-card-desc">保研竞争 · 暗恋 · 室友夜谈</div>
+        <div class="theme-card-desc">保研、暗恋、匿名情书与宿舍夜谈</div>
       </div>
-      <div class="theme-card" data-theme="variety">
-        <canvas class="theme-card-preview" id="landing-preview-variety" width="512" height="320"></canvas>
+      <div class="theme-card featured" data-theme="variety">
+        <span class="card-ribbon">💋 撕逼之夜</span>
+        <canvas class="theme-preview-canvas" id="landing-preview-variety" width="200" height="120"></canvas>
         <div class="theme-card-label">💋 恋综·海岛之夜</div>
-        <div class="theme-card-desc">CP · 淘汰 · 节目组操控</div>
+        <div class="theme-card-desc">CP、淘汰、节目组操控与无摄像头夜</div>
+      </div>
+      <div class="theme-card" data-theme="medieval">
+        <canvas class="theme-preview-canvas" id="landing-preview-medieval" width="200" height="120"></canvas>
+        <div class="theme-card-label">🏘️ 中世纪小镇</div>
+        <div class="theme-card-desc">一场火灾的秘密笼罩着山谷小镇</div>
       </div>
       <div class="theme-card" data-theme="space">
-        <canvas class="theme-card-preview" id="landing-preview-space" width="512" height="320"></canvas>
+        <canvas class="theme-preview-canvas" id="landing-preview-space" width="200" height="120"></canvas>
         <div class="theme-card-label">🚀 深空空间站</div>
-        <div class="theme-card-desc">失联47天，氧气告急</div>
+        <div class="theme-card-desc">与地球失联47天，氧气正在耗尽</div>
       </div>
       <div class="theme-card" data-theme="ocean">
-        <canvas class="theme-card-preview" id="landing-preview-ocean" width="512" height="320"></canvas>
+        <canvas class="theme-preview-canvas" id="landing-preview-ocean" width="200" height="120"></canvas>
         <div class="theme-card-label">🌊 深海殖民地</div>
-        <div class="theme-card-desc">海底的秘密浮出水面</div>
+        <div class="theme-card-desc">海底三千米下的秘密浮出水面</div>
       </div>
       <div class="theme-card" data-theme="cyberpunk">
-        <canvas class="theme-card-preview" id="landing-preview-cyberpunk" width="512" height="320"></canvas>
+        <canvas class="theme-preview-canvas" id="landing-preview-cyberpunk" width="200" height="120"></canvas>
         <div class="theme-card-label">🌃 赛博朋克之城</div>
-        <div class="theme-card-desc">霓虹下的暗影</div>
+        <div class="theme-card-desc">霓虹灯下的影子比人更真实</div>
       </div>
     </div>
 
     <div class="landing-actions">
-      <button class="pixel-btn primary" id="custom-btn">✨ 自定义世界</button>
+      <button class="pixel-btn primary" id="custom-btn">🎨 自定义世界</button>
     </div>
   </div>
 
-  <!-- ========== WIZARD VIEW ========== -->
+  <!-- ====== 创建向导（5 步剧本式） ====== -->
   <div id="wizard-view" class="hidden">
     <div class="wizard-header">
-      <h2>创建你的世界</h2>
-      <div class="wiz-nav-dots">
-        <span class="wiz-dot" data-step="1"></span>
-        <span class="wiz-dot" data-step="2"></span>
-        <span class="wiz-dot" data-step="3"></span>
-        <span class="wiz-dot" data-step="4"></span>
-        <span class="wiz-dot" data-step="5"></span>
+      <h2><span class="pixel-font">EchoWorld</span> — 世界构建器</h2>
+      <div class="wizard-steps">
+        <span class="wiz-dot active">1·主题</span>
+        <span class="wiz-dot">2·故事</span>
+        <span class="wiz-dot">3·角色</span>
+        <span class="wiz-dot">4·关系</span>
+        <span class="wiz-dot">5·预览</span>
       </div>
-      <div class="wiz-nav-btns">
-        <button class="pixel-btn sm" id="wiz-back" style="display:none">← 上一步</button>
-        <button class="pixel-btn sm primary" id="wiz-next">下一步 →</button>
-        <button class="pixel-btn sm" id="wiz-exit-btn">退出</button>
-      </div>
+      <button class="pixel-btn sm" id="wiz-exit-btn" title="放弃，回首页">✕</button>
     </div>
-    <div id="wiz-step-1" class="wiz-step active"></div>
-    <div id="wiz-step-2" class="wiz-step"></div>
-    <div id="wiz-step-3" class="wiz-step"></div>
-    <div id="wiz-step-4" class="wiz-step"></div>
-    <div id="wiz-step-5" class="wiz-step"></div>
+    <div class="wizard-body">
+      <div class="wiz-step active" id="wiz-step-1"></div>
+      <div class="wiz-step" id="wiz-step-2"></div>
+      <div class="wiz-step" id="wiz-step-3"></div>
+      <div class="wiz-step" id="wiz-step-4"></div>
+      <div class="wiz-step" id="wiz-step-5"></div>
+    </div>
+    <div class="wizard-footer">
+      <button class="pixel-btn" id="wiz-back" style="display:none">← 上一步</button>
+      <button class="pixel-btn primary" id="wiz-next">下一步 →</button>
+    </div>
   </div>
 
-  <!-- ========== SIMULATION VIEW ========== -->
+  <!-- ====== 模拟主界面 ====== -->
   <div id="simulation-view" class="hidden">
-
-    <!-- Scene Tabs Bar -->
-    <div id="scene-tabs">
-      <div class="tabs-row" id="scene-tabs-row"></div>
-      <button class="pixel-btn sm" id="new-scene-btn">+ 新世界</button>
-    </div>
-
-    <!-- Header -->
     <header>
-      <div class="header-left">
-        <span id="clock">--</span>
-        <span id="tick-badge" class="tick-badge">tick --</span>
-        <span id="room-prev" class="nav-btn" title="上一个房间">◀</span>
-        <span id="room-name" class="room-label">--</span>
-        <span id="room-next" class="nav-btn" title="下一个房间">▶</span>
+      <h1 class="logo">EchoWorld<span class="subtle"> · 像素模拟</span></h1>
+      <div class="clock">
+        <span id="clock">第 - 天 --:--</span>
+        <span class="badge" id="tick-badge">tick 0</span>
       </div>
-      <div class="header-center">
-        <div id="room-bar" class="room-bar"></div>
+      <!-- v5.1: LLM HUD —— 常驻显示真实 LLM 调用次数 / 累计 token / 当前 provider；
+           token=0 长时间不动 → 当前正在跑 mock；快速上涨 → 真 LLM 在烧。 -->
+      <div id="llm-hud" title="LLM 实时统计：calls · tokens · provider">
+        <span class="llm-hud-icon">🔥</span>
+        <span id="llm-calls">0 calls</span>
+        <span class="llm-hud-sep">·</span>
+        <span id="llm-tokens">0 tok</span>
+        <span class="llm-hud-sep">·</span>
+        <span id="llm-provider">—</span>
       </div>
-      <div class="header-right">
-        <button class="speed-btn" data-speed="0.5">0.5x</button>
-        <button class="speed-btn active" data-speed="1">1x</button>
-        <button class="speed-btn" data-speed="2">2x</button>
-        <button class="speed-btn" data-speed="4">4x</button>
-        <button class="pixel-btn sm" id="reset-btn">重置</button>
+      <!-- 玩家身份徽章 -->
+      <div class="player-mode-badge" id="player-mode-badge" title="点击切换身份">
+        <span id="pm-icon">☁️</span>
+        <span id="pm-label">上帝视角</span>
+        <button class="pm-exit" id="pm-exit" title="退回上帝模式" style="display:none">⤴</button>
+      </div>
+      <div class="controls">
+        <span class="ctl-label">速度</span>
+        <button class="pixel-btn speed-btn active" data-speed="1">1×</button>
+        <button class="pixel-btn speed-btn" data-speed="4">4×</button>
+        <button class="pixel-btn speed-btn" data-speed="8">8×</button>
+        <button class="pixel-btn" id="add-agent-btn" title="向当前世界投放新角色">➕ 新角色</button>
+        <button class="pixel-btn" id="ending-btn" title="基于当前关系生成故事结局">📜 看故事结局</button>
+        <button class="pixel-btn reset" id="reset-btn">↻ 重置</button>
       </div>
     </header>
 
-    <!-- Main Area -->
-    <div class="main-area">
-      <!-- Left: Canvas + Seed -->
-      <div id="canvas-section" class="canvas-section">
+    <!-- 场景 tabs -->
+    <nav id="scene-tabs">
+      <div class="tabs-row" id="scene-tabs-row"></div>
+      <button class="pixel-btn sm" id="new-scene-btn" title="新建一个世界">➕ 新世界</button>
+    </nav>
+
+    <main>
+      <!-- 左侧角色花名册 -->
+      <aside id="roster-panel">
+        <div class="roster-header">🎭 角色</div>
+        <div id="roster-list"></div>
+      </aside>
+
+      <section id="canvas-section">
+        <div class="canvas-toolbar">
+          <button class="pixel-btn sm view-btn active" data-view="overview" id="view-overview">🗺️ 鸟瞰全局</button>
+          <button class="pixel-btn sm view-btn" data-view="focus" id="view-focus">🔍 聚焦房间</button>
+          <button class="pixel-btn sm" id="chronicle-btn" title="查看世界编年史">🌍 编年史</button>
+        </div>
         <canvas id="game-canvas" width="512" height="320"></canvas>
-
-        <!-- Seed Bar -->
-        <div class="seed-bar">
-          <input id="seed-input" type="text" placeholder="投放叙事种子（描述一个事件）" class="seed-input">
-          <button class="pixel-btn sm primary" id="seed-submit">投放</button>
-          <div id="seed-presets" class="seed-presets"></div>
+        <div id="room-nav">
+          <button class="pixel-btn nav-arrow" id="room-prev">◀</button>
+          <span id="room-name">—</span>
+          <button class="pixel-btn nav-arrow" id="room-next">▶</button>
         </div>
+        <!-- 底部房间分布条 -->
+        <div id="room-bar"></div>
+      </section>
 
-        <!-- Seed Sticky Cards -->
-        <div id="seed-sticky" class="seed-sticky-container"></div>
-
-        <!-- Player Mode Badge -->
-        <div id="player-mode-badge" class="player-mode-badge mode-god">
-          <span id="pm-icon">☁️</span>
-          <span id="pm-label">上帝视角</span>
-          <button class="pixel-btn sm" id="pm-exit" style="display:none">退出化身</button>
-        </div>
-
-        <!-- Avatar Panel (player controls) -->
-        <div id="avatar-panel" class="avatar-panel hidden">
-          <div class="ap-header">
-            <span id="ap-me-icon">🙂</span>
-            <span id="ap-me-name">--</span>
-            <span id="ap-me-loc">📍 --</span>
-          </div>
-          <div id="ap-bold-row" class="ap-bold-row"></div>
-          <div class="ap-actions">
-            <button class="pixel-btn sm" id="ap-say">💬 说话</button>
-            <button class="pixel-btn sm" id="ap-move">🚶 移动</button>
-            <button class="pixel-btn sm" id="ap-work">🔧 工作</button>
-            <button class="pixel-btn sm" id="ap-rest">😴 休息</button>
+      <aside id="side-panel">
+        <div class="panel-header">
+          <h3>📰 小镇快报</h3>
+          <div class="filter-tabs">
+            <button class="filter-btn active" data-filter="core" title="只看头条/种子/关系剧变">🌟 核心</button>
+            <button class="filter-btn" data-filter="all" title="所有事件">📜 全部</button>
+            <button class="filter-btn" data-filter="thought" title="只看角色心声（热点角色被推到主面板）">💭 心声</button>
           </div>
         </div>
+        <!-- pace 轨：玩家种子专属顶部 sticky 区，最多保留 3 张，每张 8s 倒计时 -->
+        <div id="seed-sticky"></div>
+        <div id="event-panel">
+          <div class="panel-ev panel-system">
+            <div class="pe-text" style="color:var(--fg-dim)">等待事件发生……</div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <div class="seed-row">
+        <input type="text" id="seed-input"
+          placeholder="投下一个叙事种子……可写：『天突然下起大雨』『XX 跟 YY 说真话』『起火了！』" />
+        <button class="pixel-btn seed-inject" id="seed-submit">🌱 投放</button>
+        <button class="pixel-btn sm" id="refresh-seeds-btn" title="基于当前场景重新推荐种子">🔁 换一批</button>
       </div>
+      <div class="seed-presets" id="seed-presets">
+        <span class="seed-hint">为你智能推荐：</span>
+        <!-- 由 main.js 动态填充 -->
+      </div>
+    </footer>
 
-      <!-- Right: Roster + Event Panel -->
-      <div class="side-panel">
-        <!-- Roster -->
-        <div class="roster-section">
-          <div class="roster-header">
-            <span>角色列表</span>
-            <button class="pixel-btn sm" id="add-agent-btn">+ 角色</button>
+    <!-- 角色详情面板 -->
+    <aside id="character-panel" class="hidden">
+      <div class="panel-header">
+        <h2 id="panel-name">—</h2>
+        <button id="panel-close">✕</button>
+      </div>
+      <div id="panel-body">加载中……</div>
+    </aside>
+
+    <!-- ====== v5: 心声流面板（右下浮动，默认收起）====== -->
+    <!-- HARD-REFRESH 提醒：v5 新增；如样式异常请 Ctrl+Shift+R 跳过浏览器缓存 -->
+    <aside id="thought-stream" class="thought-stream collapsed">
+      <button class="ts-toggle" id="ts-toggle" title="展开/收起心声流">
+        <span class="ts-toggle-icon">💭</span>
+        <span class="ts-unread" id="ts-unread" style="display:none">0</span>
+      </button>
+      <div class="ts-panel">
+        <div class="ts-header">
+          <div class="ts-title">
+            <span class="ts-pixel-dot"></span> 心声流
+            <span class="ts-provider-tag" id="ts-provider-tag" title="当前 LLM provider 链状态">—</span>
           </div>
-          <div id="roster-list" class="roster-list"></div>
+          <div class="ts-tabs">
+            <button class="ts-tab active" data-ts-tab="thoughts">💭 全部心声</button>
+            <button class="ts-tab" data-ts-tab="plans">📋 计划</button>
+            <button class="ts-tab" data-ts-tab="recalls">🧠 召回</button>
+          </div>
+          <button class="ts-close" id="ts-close" title="收起">×</button>
         </div>
-
-        <!-- Event Panel -->
-        <div class="event-section">
-          <div class="event-header">
-            <span>事件流</span>
-            <div class="filter-btns">
-              <button class="filter-btn active" data-filter="core">核心</button>
-              <button class="filter-btn" data-filter="all">全部</button>
-              <button class="filter-btn" data-filter="thought">内心</button>
+        <div class="ts-body">
+          <div class="ts-tab-content active" data-ts-tab="thoughts">
+            <!-- tool-use 轨：心声流顶部工具调用总览 -->
+            <div id="ts-tool-stats" class="ts-tool-stats">
+              <span class="tts-empty">尚无工具调用</span>
+            </div>
+            <div id="ts-thoughts-list" class="ts-list">
+              <div class="ts-empty">还没有角色开始思考，让世界跑一会儿……</div>
             </div>
           </div>
-          <div id="event-panel" class="event-panel"></div>
-        </div>
-
-        <!-- View Mode Buttons -->
-        <div class="view-modes">
-          <button class="view-btn" data-view="overview">🗺️ 鸟瞰</button>
-          <button class="view-btn active" data-view="focus">🔍 聚焦</button>
-        </div>
-
-        <!-- LLM HUD -->
-        <div id="llm-hud" class="llm-hud">
-          <span id="llm-calls">0 calls</span>
-          <span id="llm-tokens">0 tok</span>
-          <span id="llm-provider">--</span>
-        </div>
-
-        <!-- Bottom Buttons -->
-        <div class="bottom-btns">
-          <button class="pixel-btn sm" id="chronicle-btn">📖 编年史</button>
-          <button class="pixel-btn sm" id="ending-btn">🎬 结局</button>
-          <button class="pixel-btn sm" id="refresh-seeds-btn">🔁 种子</button>
+          <div class="ts-tab-content" data-ts-tab="plans">
+            <div id="ts-plans-list" class="ts-list">
+              <div class="ts-empty">尚无角色发布计划。</div>
+            </div>
+          </div>
+          <div class="ts-tab-content" data-ts-tab="recalls">
+            <div id="ts-recalls-list" class="ts-list">
+              <div class="ts-empty">还没有记忆召回事件。打开 debug 模式可看到全部召回。</div>
+            </div>
+          </div>
         </div>
       </div>
+    </aside>
+
+    <!-- canvas hover tooltip：鼠标悬停 sprite 时显示最近一条心声 -->
+    <div id="sprite-thought-tip" class="sprite-thought-tip hidden"></div>
+
+    <!-- 头条横幅 -->
+    <div id="headline-banner" class="hidden">
+      <div class="hb-headline" id="hb-headline">—</div>
+      <div class="hb-meta" id="hb-meta"></div>
+      <button id="hb-close">×</button>
     </div>
 
-    <!-- Thought Stream (bottom overlay) -->
-    <div id="thought-stream" class="thought-stream collapsed">
-      <div class="ts-header">
-        <button class="ts-toggle" id="ts-toggle">💭 思维流</button>
-        <span id="ts-unread" class="ts-unread" style="display:none">0</span>
-        <span id="ts-provider-tag" class="ts-provider-tag">LLM: --</span>
-        <button class="ts-close" id="ts-close">✕</button>
+    <!-- 化身模式：浮动操作面板 -->
+    <div id="avatar-panel" class="hidden">
+      <div class="ap-header">
+        <span id="ap-me-icon">🙂</span>
+        <span id="ap-me-name">—</span>
+        <span class="ap-loc">📍 <span id="ap-me-loc">—</span></span>
       </div>
-      <div class="ts-tabs">
-        <button class="ts-tab active" data-ts-tab="thoughts">心声</button>
-        <button class="ts-tab" data-ts-tab="plans">计划</button>
-        <button class="ts-tab" data-ts-tab="recalls">记忆</button>
+      <div class="ap-actions">
+        <button class="pixel-btn primary ap-btn" id="ap-say">💬 找人说话</button>
+        <button class="pixel-btn ap-btn" id="ap-move">🚶 去别处</button>
+        <button class="pixel-btn ap-btn" id="ap-work">💼 干点活</button>
+        <button class="pixel-btn ap-btn" id="ap-rest">😴 歇会儿</button>
       </div>
-      <div class="ts-tool-stats" id="ts-tool-stats"></div>
-      <div class="ts-tab-content active" data-ts-tab="thoughts">
-        <div id="ts-thoughts-list" class="ts-list"></div>
-      </div>
-      <div class="ts-tab-content" data-ts-tab="plans">
-        <div id="ts-plans-list" class="ts-list"></div>
-      </div>
-      <div class="ts-tab-content" data-ts-tab="recalls">
-        <div id="ts-recalls-list" class="ts-list"></div>
+      <div class="ap-shortcuts">
+        <div class="ap-shortcuts-label">💥 做我不敢做：</div>
+        <div class="ap-shortcuts-row" id="ap-bold-row"></div>
       </div>
     </div>
 
-  </div><!-- /simulation-view -->
-
-  <!-- ========== CHARACTER PANEL (overlay) ========== -->
-  <div id="character-panel" class="character-panel hidden">
-    <div class="panel-header">
-      <span id="panel-name">--</span>
-      <button class="pixel-btn sm" id="panel-close">✕</button>
+    <!-- 玩家说话弹窗 -->
+    <div id="player-say-modal" class="hidden">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>💬 你想对谁说什么</h3>
+          <button class="modal-close" id="ps-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <label>对谁说</label>
+          <select id="ps-target"></select>
+          <label>你的台词</label>
+          <textarea id="ps-utterance" rows="3" placeholder="想说什么就说什么，TA 下一 tick 会真的回应你……"></textarea>
+          <label>语气（可选）</label>
+          <select id="ps-intent">
+            <option value="玩家发言">默认</option>
+            <option value="示好">示好/调情</option>
+            <option value="试探">试探</option>
+            <option value="质问">质问/对峙</option>
+            <option value="挑衅">挑衅/挑事</option>
+            <option value="挖苦">挖苦/讽刺</option>
+            <option value="忏悔">道歉/示弱</option>
+            <option value="示警">示警</option>
+            <option value="拉拢">结盟</option>
+            <option value="敷衍">敷衍带过</option>
+          </select>
+          <div class="ps-quick-row" id="ps-quick-row">
+            <div class="ps-q-label">快速台词：</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="pixel-btn primary" id="ps-submit">📤 说！</button>
+        </div>
+      </div>
     </div>
-    <div id="panel-body" class="panel-body"></div>
+
+    <!-- 全局世界编年史模态 -->
+    <div id="chronicle-modal" class="hidden">
+      <div class="modal-box chronicle-box">
+        <div class="modal-header">
+          <h3>🌍 世界编年史</h3>
+          <button class="modal-close" id="chronicle-close">✕</button>
+        </div>
+        <div class="modal-body" id="chronicle-body">加载中……</div>
+        <div class="modal-footer">
+          <button class="pixel-btn" id="chronicle-refresh">🔄 刷新</button>
+          <button class="pixel-btn primary" id="chronicle-close-btn">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 故事结局模态 -->
+    <div id="ending-modal" class="hidden">
+      <div class="modal-box ending-box">
+        <div class="modal-header">
+          <h3>📜 故事至此</h3>
+          <button class="modal-close" id="ending-close">✕</button>
+        </div>
+        <div class="modal-body" id="ending-body">加载中……</div>
+        <div class="modal-footer">
+          <button class="pixel-btn" id="ending-refresh">🔄 重算</button>
+          <button class="pixel-btn primary" id="ending-close-btn">继续</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 玩家移动弹窗 -->
+    <div id="player-move-modal" class="hidden">
+      <div class="modal-box small">
+        <div class="modal-header">
+          <h3>🚶 你想去哪</h3>
+          <button class="modal-close" id="pm-close">✕</button>
+        </div>
+        <div class="modal-body" id="pm-place-list"></div>
+      </div>
+    </div>
+
+    <!-- 新角色 mini 弹窗 -->
+    <div id="add-agent-modal" class="hidden">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>➕ 投放新角色</h3>
+          <button class="modal-close" id="add-agent-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <label>名字</label>
+          <input id="aa-name" placeholder="例如：Iris" />
+          <label>Emoji（一个字符）</label>
+          <input id="aa-emoji" placeholder="🙂" maxlength="4" />
+          <label>身份（任意写，LLM 自动理解）</label>
+          <input id="aa-role" list="aa-role-suggestions" placeholder="如：老板的小三、流浪诗人、扫地大爷……或选下面" autocomplete="off" />
+          <datalist id="aa-role-suggestions">
+            <option value="doctor">医生</option>
+            <option value="blacksmith">铁匠</option>
+            <option value="merchant">商人</option>
+            <option value="artist">艺术家</option>
+            <option value="innkeeper">酒馆老板</option>
+            <option value="farmer">农夫</option>
+            <option value="child">孩子</option>
+            <option value="elder">长者</option>
+            <option value="boss">老板</option>
+            <option value="hr">HR</option>
+            <option value="designer">设计师</option>
+            <option value="engineer">程序员</option>
+            <option value="salesperson">销售</option>
+            <option value="leader">主管</option>
+            <option value="intern">实习生</option>
+            <option value="scientist">科学家</option>
+            <option value="pilot">驾驶员</option>
+            <option value="security">安保</option>
+            <option value="technician">技术员</option>
+            <option value="botanist">植物学家</option>
+          </datalist>
+          <label>初始地点</label>
+          <select id="aa-location"></select>
+          <label>人物设定（persona）</label>
+          <textarea id="aa-persona" rows="2" placeholder="人物背景、外貌、性格关键词。空缺则按职业默认生成。"></textarea>
+          <label>说话风格（voice）</label>
+          <input id="aa-voice" placeholder="例如：语气温柔但话里带刺" />
+          <label>一条未完结心事（thread）</label>
+          <input id="aa-thread" placeholder="例如：暗中调查上任画家失踪的真相" />
+          <label>心事针对的角色（可选）</label>
+          <input id="aa-thread-target" placeholder="留空表示泛指" />
+        </div>
+        <div class="modal-footer">
+          <button class="pixel-btn primary" id="aa-submit">🌱 投放</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- ========== MODALS ========== -->
-
-  <!-- Add Agent Modal -->
-  <div id="add-agent-modal" class="modal hidden">
-    <div class="modal-content">
-      <h3>投放新角色</h3>
-      <label>名字</label><input id="aa-name" type="text" placeholder="角色名">
-      <label>Emoji</label><input id="aa-emoji" type="text" placeholder="🙂" maxlength="4">
-      <label>身份</label><input id="aa-role" type="text" placeholder="如：铁匠、流浪诗人">
-      <label>地点</label><select id="aa-location"></select>
-      <label>人物设定</label><textarea id="aa-persona" rows="2"></textarea>
-      <label>说话风格</label><input id="aa-voice" type="text">
-      <label>心事描述</label><input id="aa-thread" type="text" placeholder="未完结的心事">
-      <label>心事目标</label><input id="aa-thread-target" type="text" placeholder="留空=无指定对象">
-      <div class="modal-btns">
-        <button class="pixel-btn primary sm" id="aa-submit">投放</button>
-        <button class="pixel-btn sm" id="add-agent-close">取消</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Player Say Modal -->
-  <div id="player-say-modal" class="modal hidden">
-    <div class="modal-content">
-      <h3>💬 说话</h3>
-      <label>对谁说</label><select id="ps-target"></select>
-      <label>说什么</label><textarea id="ps-utterance" rows="2"></textarea>
-      <label>意图</label><input id="ps-intent" type="text" value="玩家发言">
-      <div id="ps-quick-row" class="ps-quick-row"></div>
-      <div class="modal-btns">
-        <button class="pixel-btn primary sm" id="ps-submit">发送</button>
-        <button class="pixel-btn sm" id="ps-close">取消</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Player Move Modal -->
-  <div id="player-move-modal" class="modal hidden">
-    <div class="modal-content">
-      <h3>🚶 前往</h3>
-      <div id="pm-place-list" class="place-list"></div>
-      <div class="modal-btns">
-        <button class="pixel-btn sm" id="pm-close">取消</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Chronicle Modal -->
-  <div id="chronicle-modal" class="modal hidden">
-    <div class="modal-content modal-lg">
-      <div class="modal-header">
-        <h3>📖 编年史</h3>
-        <button class="pixel-btn sm" id="chronicle-close">✕</button>
-        <button class="pixel-btn sm" id="chronicle-refresh">🔁</button>
-      </div>
-      <div id="chronicle-body" class="chronicle-body"></div>
-      <div class="modal-btns">
-        <button class="pixel-btn sm" id="chronicle-close-btn">关闭</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Ending Modal -->
-  <div id="ending-modal" class="modal hidden">
-    <div class="modal-content modal-lg">
-      <div class="modal-header">
-        <h3>🎬 故事结局</h3>
-        <button class="pixel-btn sm" id="ending-close">✕</button>
-        <button class="pixel-btn sm" id="ending-refresh">🔁</button>
-      </div>
-      <div id="ending-body" class="ending-body"></div>
-      <div class="modal-btns">
-        <button class="pixel-btn sm" id="ending-close-btn">关闭</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Headline Banner (overlay) -->
-  <div id="headline-banner" class="headline-banner hidden">
-    <div class="hb-inner">
-      <div class="hb-label">📰 叙事头条</div>
-      <div id="hb-headline" class="hb-headline">--</div>
-      <div id="hb-meta" class="hb-meta"></div>
-      <button class="pixel-btn sm hb-close" id="hb-close">✕</button>
-    </div>
-  </div>
-
-  <!-- Sprite Thought Tooltip (floating) -->
-  <div id="sprite-thought-tip" class="sprite-thought-tip hidden"></div>
-
-  <!-- ====== SCRIPTS ====== -->
-  <!-- app.js is the entry: imports api/sse/renderer/wizard + defines APP -->
-  <!-- Patching modules load after app.js (they patch methods onto APP at load time; execute before DOMContentLoaded) -->
-  <script type="module" src="js/app.js"></script>
-  <script type="module" src="js/thought-stream.js"></script>
-  <script type="module" src="js/event-panel.js"></script>
-  <script type="module" src="js/character-panel.js"></script>
-  <script type="module" src="js/roster.js"></script>
-
+  <script src="/static/js/canvas/tileset.js"></script>
+  <script src="/static/js/canvas/sprite_palettes.js"></script>
+  <script src="/static/js/canvas/sprite_parts.js"></script>
+  <script src="/static/js/canvas/sprite_generator.js"></script>
+  <script src="/static/js/canvas/animation.js"></script>
+  <script src="/static/js/canvas/speech_bubble.js"></script>
+  <script src="/static/js/canvas/room_layouts.js"></script>
+  <script src="/static/js/canvas/room_renderer.js"></script>
+  <script src="/static/js/canvas/engine.js"></script>
+  <script src="/static/js/canvas/renderer.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/sse.js"></script>
+  <script src="/static/js/main.js"></script>
 </body>
 </html>

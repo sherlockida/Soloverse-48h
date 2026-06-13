@@ -205,7 +205,7 @@ export function formatDelta(d) {
 
 // ====== Immediate roster refresh after world_state_change ======
 
-export async refreshRosterNow() {
+export async function refreshRosterNow() {
   try {
     const state = await API.sceneState(APP.sceneId);
     if (state && state.agents) {

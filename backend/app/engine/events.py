@@ -5,6 +5,7 @@ import asyncio
 import json
 import time
 from collections import defaultdict
+from dataclasses import dataclass, field
 from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
@@ -42,33 +43,51 @@ class Event(BaseModel):
         return json.dumps(self.model_dump(), ensure_ascii=False)
 
 
+@dataclass
+class _SubscriberInfo:
+    """Internal bookkeeping for one subscriber queue."""
+    queue: asyncio.Queue[Event]
+    created_at: float = field(default_factory=time.time)
+    last_put_ok: float = field(default_factory=time.time)  # last successful put timestamp
+
+
 class EventBus:
     """每个 SSE 连接是一个 subscriber，独立 queue。
 
     线程/协程安全：
     - 所有对 _subscribers 的读写都在 self._lock 保护下进行
     - 死订阅者清理：连续 50 次 QueueFull 后自动移除
+    - TTL 清理：每 100 次 publish 自动清理超龄且满队列的订阅者
     """
 
     _DEAD_THRESHOLD: int = 50  # consecutive QueueFull before removal
+    _CLEANUP_INTERVAL: int = 100  # publish calls between TTL cleanups
+    _DEFAULT_MAX_AGE: float = 300.0  # seconds before stale subscriber eligible for removal
 
     def __init__(self, history_size: int = 200):
         self._subscribers: list[asyncio.Queue[Event]] = []
+        self._subscriber_info: dict[asyncio.Queue[Event], _SubscriberInfo] = {}
         self._history: list[Event] = []
         self._history_size = history_size
         self._lock = asyncio.Lock()
         self._dead_count: dict[asyncio.Queue[Event], int] = defaultdict(int)
+        self._publish_count: int = 0
 
     async def publish(self, ev: Event) -> None:
         async with self._lock:
+            self._publish_count += 1
             self._history.append(ev)
             if len(self._history) > self._history_size:
                 self._history = self._history[-self._history_size:]
             dead_queues: list[asyncio.Queue[Event]] = []
+            now = time.time()
             for q in list(self._subscribers):
                 try:
                     q.put_nowait(ev)
                     self._dead_count[q] = 0  # reset on successful delivery
+                    info = self._subscriber_info.get(q)
+                    if info is not None:
+                        info.last_put_ok = now
                 except asyncio.QueueFull:
                     self._dead_count[q] += 1
                     if self._dead_count[q] >= self._DEAD_THRESHOLD:
@@ -76,6 +95,10 @@ class EventBus:
             for q in dead_queues:
                 self._subscribers.remove(q)
                 del self._dead_count[q]
+                self._subscriber_info.pop(q, None)
+            # Periodic TTL cleanup
+            if self._publish_count % self._CLEANUP_INTERVAL == 0:
+                self._cleanup_stale_subscribers()
 
     def history(self, limit: int = 50) -> list[Event]:
         return self._history[-limit:]
@@ -89,6 +112,7 @@ class EventBus:
 
     async def subscribe(self) -> asyncio.Queue[Event]:
         q: asyncio.Queue[Event] = asyncio.Queue(maxsize=500)
+        info = _SubscriberInfo(queue=q)
         async with self._lock:
             # 推送历史，让新连接也能看到上下文
             for ev in self._history[-50:]:
@@ -98,6 +122,7 @@ class EventBus:
                     break
             self._subscribers.append(q)
             self._dead_count[q] = 0
+            self._subscriber_info[q] = info
         return q
 
     def unsubscribe(self, q: asyncio.Queue[Event]) -> None:
@@ -105,6 +130,7 @@ class EventBus:
         if q in self._subscribers:
             self._subscribers.remove(q)
         self._dead_count.pop(q, None)
+        self._subscriber_info.pop(q, None)
 
     def subscriber_stats(self) -> dict:
         """Diagnostic: return current subscriber count and dead-count info."""
@@ -118,4 +144,37 @@ class EventBus:
             },
             "history_size": len(self._history),
             "history_limit": self._history_size,
+            "publish_count": self._publish_count,
+            "subscriber_info_count": len(self._subscriber_info),
         }
+
+    # ------------------------------------------------------------------
+    # TTL cleanup (called internally under self._lock)
+    # ------------------------------------------------------------------
+
+    def _cleanup_stale_subscribers(
+        self, max_age_seconds: float = _DEFAULT_MAX_AGE
+    ) -> list[asyncio.Queue[Event]]:
+        """Remove subscribers whose queue is persistently full AND older than max_age_seconds.
+
+        Must be called while self._lock is held (publish already holds it).
+        Returns list of removed queues for diagnostic purposes.
+        """
+        now = time.time()
+        removed: list[asyncio.Queue[Event]] = []
+        for q in list(self._subscribers):
+            info = self._subscriber_info.get(q)
+            if info is None:
+                continue
+            age = now - info.created_at
+            # Only consider stale if: queue is full AND older than max_age
+            if age < max_age_seconds:
+                continue
+            # Check if queue is full (dead_count > 0 indicates recent failures)
+            if self._dead_count.get(q, 0) > 0:
+                removed.append(q)
+        for q in removed:
+            self._subscribers.remove(q)
+            self._dead_count.pop(q, None)
+            self._subscriber_info.pop(q, None)
+        return removed

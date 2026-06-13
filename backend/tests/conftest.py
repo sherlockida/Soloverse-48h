@@ -20,6 +20,14 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 # ---------------------------------------------------------------------------
+# Ensure backend/ (the app package root) is on sys.path so that
+# ``import app.engine.events`` resolves correctly.
+# ---------------------------------------------------------------------------
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent
+if str(_BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(_BACKEND_ROOT))
+
+# ---------------------------------------------------------------------------
 # Register origin/backend as the canonical ``backend`` package.
 # ---------------------------------------------------------------------------
 _ORIGIN_DIR = Path(__file__).resolve().parents[2] / "origin"
@@ -51,6 +59,18 @@ _narrative_mod = importlib.import_module(".narrative", package=_PACKAGE_NAME)
 _seed_loader_mod = importlib.import_module(".seed_loader", package=_PACKAGE_NAME)
 
 # ---------------------------------------------------------------------------
+# Also import app.engine.events so tests for the new TTL-cleanup EventBus
+# can run against the real production module.
+# ---------------------------------------------------------------------------
+_app_events_mod = importlib.import_module("app.engine.events")
+
+# ---------------------------------------------------------------------------
+# Import app.agents.tools so tool tests run against the PRODUCTION split
+# modules (which return ToolResult), not the origin reference monolith.
+# ---------------------------------------------------------------------------
+_app_tools_mod = importlib.import_module("app.agents.tools")
+
+# ---------------------------------------------------------------------------
 # Re-export into test-friendly ``backend`` namespace so test files can do
 # ``from backend.memory import Memory`` etc.
 # ---------------------------------------------------------------------------
@@ -58,8 +78,8 @@ class _BackendNamespace:
     """Lazy namespace that delegates to the real origin sub-modules."""
     memory = _memory_mod
     agent = _agent_mod
-    events = _events_mod
-    tools = _tools_mod
+    events = _app_events_mod  # use production EventBus with TTL cleanup
+    tools = _app_tools_mod  # use production split tools (return ToolResult)
     world = _world_mod
     llm_client = _llm_mod
     prompts = _prompts_mod
@@ -70,8 +90,8 @@ class _BackendNamespace:
 sys.modules["backend"] = _BackendNamespace()
 sys.modules["backend.memory"] = _memory_mod
 sys.modules["backend.agent"] = _agent_mod
-sys.modules["backend.events"] = _events_mod
-sys.modules["backend.tools"] = _tools_mod
+sys.modules["backend.events"] = _app_events_mod
+sys.modules["backend.tools"] = _app_tools_mod
 sys.modules["backend.world"] = _world_mod
 sys.modules["backend.llm_client"] = _llm_mod
 sys.modules["backend.prompts"] = _prompts_mod

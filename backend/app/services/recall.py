@@ -1,13 +1,8 @@
 """recall / summarize 算法（无外部 embedding）。
 
-v5 升级要点：
-- recall(memories, query, k, ...) -> MMR + Jaccard + TF + recency + emotion + importance
-- summarize(memories, llm=...) -> 取最旧 N 条压成 1 条 summary Memory，
-  LLM 调用带 8s 超时保护，超时或失败时程序化降级
-- append_semantic(semantic_list, new, cap=20) -> 维护 semantic memory 上限
-- build_recall_query(...) -> 便利函数，拼接当前情境供 recall 使用
-
-依赖：backend/app/models/memory.py（Memory, tokenize 等）
+recall: MMR + Jaccard + TF + recency + emotion + importance 打分去重取 top-k。
+summarize: 最旧 N 条压成 1 条 summary，LLM 8s 超时保护，失败程序化降级。
+append_semantic / build_recall_query 为辅助工具。依赖 app.models.memory。
 """
 from __future__ import annotations
 
@@ -80,17 +75,14 @@ def recall(
     mmr_lambda: float = 0.7,
     min_score: float = 0.02,
 ) -> list[Memory]:
-    """根据 query 召回 top-k 最相关 memory，MMR 去重。
+    """根据 query 召回 top-k 最相关 memory，MMR 去重。返回 list[Memory]，长度 <= k。
 
     - memories: episodic memory 列表（通常是 agent.memories）
     - query:    自然语言描述当前情境，如 "在 茶水间 看到 Mia 阿凯 想 talk"
-    - k:        返回上限
-    - cur_tick: 当前 tick；缺省取 memories 内最大 tick
+    - k: 返回上限；cur_tick: 当前 tick，缺省取 memories 内最大 tick
     - semantic: 可选 semantic memory（不进 30 条截断窗口），与 episodic 一起打分
     - mmr_lambda: 0..1，越高越偏 relevance，越低越偏多样性
     - min_score: 低于此分的 memory 不进候选；全 0 时回退最近 3 条 episodic
-
-    返回按 MMR 重排后的 list[Memory]，长度 <= k。
     """
     if k <= 0:
         return []
@@ -196,14 +188,9 @@ async def summarize(
 ) -> Optional[Memory]:
     """挑最旧 take 条 episodic -> 浓缩成 1 条 summary Memory。
 
-    - LLM 可用：调用 `await llm.chat_json(sys, usr, kind="summarize")`，接受 str 或 dict 返回；
-      解析失败/异常/超时时回落到程序化拼接。
-    - LLM 超时保护：llm.chat_json 调用包裹在 asyncio.wait_for(timeout=8.0) 中，
-      超时则自动降级到程序化摘要，不会阻塞 agent 决策循环。
-    - LLM 不可用（llm is None）：直接程序化拼接。
-
-    返回 1 条 Memory(kind="summary")；输入为空时返回 None。
-    caller 负责把它 append 到 agent.semantic 并维护上限。
+    LLM 可用则调用 chat_json(kind="summarize")（8s 超时，失败/超时/解析错误
+    均降级到程序化拼接）；llm 为 None 时直接程序化拼接。
+    返回 Memory(kind="summary")，输入空返回 None；caller 负责追加到 semantic。
     """
     if not memories:
         return None

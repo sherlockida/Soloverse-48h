@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr, field_validator
 
 logger = logging.getLogger("echoworld.memory")
 
@@ -105,6 +105,24 @@ class Memory(BaseModel):
     # v5 新增：参与者 + 重要度（importance=0 表示用 kind 默认值）
     participants: list[str] = Field(default_factory=list)
     importance: int = 0  # 0..10
+
+    @field_validator("emotion", mode="before")
+    @classmethod
+    def clamp_emotion(cls, v: object) -> int:
+        try:
+            iv = int(v)
+        except (TypeError, ValueError):
+            return 0
+        return max(-5, min(5, iv))
+
+    @field_validator("importance", mode="before")
+    @classmethod
+    def clamp_importance(cls, v: object) -> int:
+        try:
+            iv = int(v)
+        except (TypeError, ValueError):
+            return 0
+        return max(0, min(10, iv))
 
     # 私有缓存（不参与序列化）
     _tokens_cache: Optional[set[str]] = PrivateAttr(default=None)

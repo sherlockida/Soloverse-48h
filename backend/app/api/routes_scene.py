@@ -276,7 +276,7 @@ async def patch_agent(scene_id: str, name: str, request: Request):
 @router.get("/api/templates/{theme}")
 async def get_template(theme: str):
     """Serve a pre-built theme template JSON."""
-    template_path = Path(__file__).resolve().parent.parent.parent / "config" / "templates" / f"{theme}.json"
+    template_path = Path(__file__).resolve().parents[3] / "config" / "templates" / f"{theme}.json"
     if not template_path.exists():
         raise HTTPException(status_code=404, detail=f"template {theme} not found")
     return JSONResponse(content=json.loads(template_path.read_text(encoding="utf-8")))

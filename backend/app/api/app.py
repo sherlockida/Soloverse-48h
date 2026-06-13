@@ -152,12 +152,7 @@ class NoCacheStaticFiles(StaticFiles):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Create WorldManager on startup; stop all loops on shutdown."""
-    # WorldManager lives in origin/backend/ until migrated; import lazily
-    # so the module structure stays decoupled.
-    try:
-        from origin.backend.world_manager import WorldManager
-    except ImportError:
-        from app.engine.world_manager import WorldManager  # future home
+    from app.engine.world_manager import WorldManager
 
     from app.services import LLMClient
 
@@ -178,7 +173,7 @@ async def lifespan(app: FastAPI):
 # App factory
 # =====================================================================
 
-FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
+FRONTEND_DIR = Path(__file__).resolve().parents[3] / "frontend"
 
 
 def create_app() -> FastAPI:
@@ -192,6 +187,9 @@ def create_app() -> FastAPI:
     # -- Static files --
     if FRONTEND_DIR.exists():
         app.mount("/static", NoCacheStaticFiles(directory=str(FRONTEND_DIR)), name="static")
+        # 挂载 /css 和 /js：让 index.html 的相对引用（css/style.css, js/app.js）可同源访问
+        app.mount("/css", NoCacheStaticFiles(directory=str(FRONTEND_DIR / "css")), name="css")
+        app.mount("/js", NoCacheStaticFiles(directory=str(FRONTEND_DIR / "js")), name="js")
 
     # -- Timeout middleware --
     add_timeout_middleware(app)

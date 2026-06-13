@@ -1,6 +1,6 @@
-// API — Fetch wrappers for all EchoWorld endpoints
+// API — Fetch wrappers for all EchoWorld endpoints (ES module)
 
-const API = {
+export const API = {
   async get(url) {
     const r = await fetch(url);
     if (!r.ok) throw new Error(`API ${r.status}: ${url}`);
@@ -127,3 +127,8 @@ const API = {
     }
   },
 };
+
+// Also register on window for any legacy global references
+if (typeof window !== 'undefined') {
+  window.API = API;
+}

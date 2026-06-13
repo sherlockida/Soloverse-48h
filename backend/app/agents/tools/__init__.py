@@ -4,7 +4,7 @@
   - SOFT_TOOLS, HARD_TOOLS, ALL_TOOL_NAMES   -- 工具名集合
   - is_soft(name), is_hard(name)              -- 分类判断
   - TOOL_REGISTRY                             -- {name: async fn} 映射
-  - dispatch_tool(name, agent, world, args, parent_thought=...) -> dict
+  - dispatch_tool(name, agent, world, args, parent_thought=...) -> ToolResult
   - tool_observe, tool_recall, tool_introspect, tool_plan   -- 软工具
   - tool_talk, tool_move, tool_work                       -- 硬工具
 """

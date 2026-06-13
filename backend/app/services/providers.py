@@ -11,29 +11,45 @@ import re
 import time
 from typing import Any, Optional
 
+from app.models.llm import ProviderConfig
+
 logger = logging.getLogger("echoworld.llm")
 
 
 # ============================================================================
 # Provider 注册表 —— 全部走 OpenAI 兼容协议
 # ============================================================================
-# (api_key_env, base_url_env, default_base_url, model_env, default_model, allow_no_key)
-PROVIDER_REGISTRY: dict[str, tuple[str, str, str, str, str, bool]] = {
-    "deepseek": ("DEEPSEEK_API_KEY", "DEEPSEEK_BASE_URL",
-                 "https://api.deepseek.com/v1",
-                 "DEEPSEEK_MODEL", "deepseek-chat", False),
-    "zhipu":    ("ZHIPU_API_KEY",    "ZHIPU_BASE_URL",
-                 "https://open.bigmodel.cn/api/paas/v4",
-                 "ZHIPU_MODEL",    "glm-4-flash", False),
-    "moonshot": ("MOONSHOT_API_KEY", "MOONSHOT_BASE_URL",
-                 "https://api.moonshot.cn/v1",
-                 "MOONSHOT_MODEL", "moonshot-v1-8k", False),
-    "qwen":     ("QWEN_API_KEY",     "QWEN_BASE_URL",
-                 "https://dashscope.aliyuncs.com/compatible-mode/v1",
-                 "QWEN_MODEL",     "qwen-turbo", False),
-    "ollama":   ("OLLAMA_API_KEY",   "OLLAMA_BASE_URL",
-                 "http://127.0.0.1:11434/v1",
-                 "OLLAMA_MODEL",   "qwen2.5:3b", True),   # 本地 ollama 不需要 key
+PROVIDER_REGISTRY: dict[str, ProviderConfig] = {
+    "deepseek": ProviderConfig(
+        key_env="DEEPSEEK_API_KEY", base_url_env="DEEPSEEK_BASE_URL",
+        default_base_url="https://api.deepseek.com/v1",
+        model_env="DEEPSEEK_MODEL", default_model="deepseek-chat",
+        allow_no_key=False,
+    ),
+    "zhipu": ProviderConfig(
+        key_env="ZHIPU_API_KEY", base_url_env="ZHIPU_BASE_URL",
+        default_base_url="https://open.bigmodel.cn/api/paas/v4",
+        model_env="ZHIPU_MODEL", default_model="glm-4-flash",
+        allow_no_key=False,
+    ),
+    "moonshot": ProviderConfig(
+        key_env="MOONSHOT_API_KEY", base_url_env="MOONSHOT_BASE_URL",
+        default_base_url="https://api.moonshot.cn/v1",
+        model_env="MOONSHOT_MODEL", default_model="moonshot-v1-8k",
+        allow_no_key=False,
+    ),
+    "qwen": ProviderConfig(
+        key_env="QWEN_API_KEY", base_url_env="QWEN_BASE_URL",
+        default_base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        model_env="QWEN_MODEL", default_model="qwen-turbo",
+        allow_no_key=False,
+    ),
+    "ollama": ProviderConfig(
+        key_env="OLLAMA_API_KEY", base_url_env="OLLAMA_BASE_URL",
+        default_base_url="http://127.0.0.1:11434/v1",
+        model_env="OLLAMA_MODEL", default_model="qwen2.5:3b",
+        allow_no_key=True,
+    ),
 }
 
 
@@ -82,7 +98,7 @@ class _OpenAIBackend:
         self.base_url = base_url
         self.use_function_calling = bool(use_function_calling)
 
-    async def chat(self, system: str, user: str, max_tokens: int = 800,
+    async def chat(self, system: str, user: str, max_tokens: int = 2048,
                     tools: Optional[list] = None) -> tuple[str, dict]:
         """返回 (text, usage_dict)。usage_dict 至少含
         {prompt_tokens, completion_tokens, total_tokens, latency_ms, model}。

@@ -1,0 +1,26 @@
+{
+  "theme": "cyberpunk",
+  "story_background": "2077 年，霓虹城第 13 区。巨型企业 NeoGen 控制了从供水到记忆的一切。底层居民靠黑市数据芯片和地下黑客网络苟活。最近，有人在暗网发布了一段视频——NeoGen 的 CEO 在一个不该存在的地下实验室里，对着某种非人类的东西说话。发布者 24 小时内失踪，而每个看过视频的人都觉得自己的记忆少了点什么。",
+  "places": ["霓虹广场", "地下诊所", "黑市巷", "数据神殿", "废铁酒吧", "废弃公寓"],
+  "agents": [
+    {"name": "Nyx", "role": "technician", "emoji": "👩‍💻", "persona": "地下黑客，代号 V0id。曾侵入 NeoGen 内网偷数据，出来后记忆少了 72 小时。", "voice": "打字速度比说话快三倍，口头禅'给我 5 秒'。", "goals": ["找回被删除的记忆", "曝光 NeoGen 的真相"], "location": "数据神殿", "color_palette": {"skin": "#e0d0c0", "hair": "#1a0a2a", "clothes": "#1a1a3a", "eyes": "#6a3aff", "accessory": "#ff2a8a"}, "threads": [{"desc": "那段缺失的 72 小时记忆里，有什么不该知道的东西", "target": null, "weight": 10}]},
+    {"name": "Raze", "role": "security", "emoji": "🦾", "persona": "前 NeoGen 安保队长，全身 60% 义体化。在一次行动中违抗了命令，被降级到第 13 区巡逻。左臂炮管里藏着一枚未发射的子弹。", "voice": "军人的简洁，但说到 NeoGen 时齿间有微不可闻的切齿声。", "goals": ["查清被降级的真正原因", "保护 13 区居民"], "location": "霓虹广场", "color_palette": {"skin": "#8b6b4a", "hair": "#1a1a1a", "clothes": "#2a2a3a", "eyes": "#ff2a2a", "accessory": "#6a6a8a"}, "threads": [{"desc": "那次行动中看到的目标——不是人类", "target": "Nyx", "weight": 9}]},
+    {"name": "Vex", "role": "medic", "emoji": "💉", "persona": "地下诊所的非法义体医生，用回收零件做手术。手稳得像机器，但给每个病人麻醉前都会轻声问'你确定吗'。", "voice": "不耐烦但尽责，'躺着别动，数到三'——但从来数不到三。", "goals": ["攒够钱买到离开 13 区的通行证", "不让任何病人死在手术台上"], "location": "地下诊所", "color_palette": {"skin": "#c8a090", "hair": "#2a0a1a", "clothes": "#3a1a2a", "eyes": "#6a2a4a", "accessory": "#c0393a"}, "threads": [{"desc": "最近来的病人身上都有同一种神经接口——像是追踪器", "target": "Raze", "weight": 7}]},
+    {"name": "Glitch", "role": "artist", "emoji": "🎭", "persona": "全息涂鸦艺术家，用无人机在黑市巷的墙上投射会动的壁画。白天是 NeoGen 清洁工，晚上是 13 区最出名的匿名创作者。", "voice": "用隐喻和引用说话，'昨晚的墙比镜子诚实'。", "goals": ["完成能'唤醒人们'的作品", "不被 NeoGen 发现双重身份"], "location": "黑市巷", "color_palette": {"skin": "#d4a880", "hair": "#ff4a8a", "clothes": "#3a2a4a", "eyes": "#ff8a4a", "accessory": "#2aff8a"}, "threads": [{"desc": "某人通过壁画上的暗码找到了我", "target": "Nyx", "weight": 8}]},
+    {"name": "Silk", "role": "merchant", "emoji": "💎", "persona": "黑市信息贩子，卖一切——数据、武器、记忆芯片。右眼是假的，据说能记录她看到的所有东西。", "voice": "柔滑，每句话都像在做生意，'信息不是免费的，但真相更贵'。", "goals": ["搜集足够的信息筹码离开 13 区", "不被任何势力收买"], "location": "黑市巷", "color_palette": {"skin": "#c8a880", "hair": "#0a0a2a", "clothes": "#2a1a3a", "eyes": "#ffcc00", "accessory": "#8a4aff"}, "threads": [{"desc": "有人出高价买 Nyx 的脑机接口数据", "target": "Nyx", "weight": 8}]},
+    {"name": "Ash", "role": "pilot", "emoji": "🏍️", "persona": "地下快递员，骑改装悬浮摩托穿行在 13 区的狭窄管道里。送的不是包裹——是人的逃生通道。", "voice": "像引擎声一样干脆，'上车'两个字就够了。", "goals": ["攒够钱改装摩托穿越封锁线", "帮一个人逃出去"], "location": "废弃公寓", "color_palette": {"skin": "#a07050", "hair": "#2a2a1a", "clothes": "#1a2a2a", "eyes": "#4a8a2a", "accessory": "#ff6a2a"}, "threads": [{"desc": "有个客人付了双倍——没告诉我包裹是什么", "target": "Silk", "weight": 7}]},
+    {"name": "Zero", "role": "elder", "emoji": "🧠", "persona": "废铁酒吧的老板，曾在 NeoGen 的数据部工作 30 年。被强制退休那天，他的记忆被「清理」——但他在清理前一刻把关键数据藏在了一条机械金鱼里。", "voice": "缓慢、断续，偶尔插入一句精准到可怕的预言。", "goals": ["找回藏在金鱼里的数据", "看看 NeoGen 倒下那天"], "location": "废铁酒吧", "color_palette": {"skin": "#b0a090", "hair": "#c0c0c0", "clothes": "#3a3a2a", "eyes": "#6a6a8a", "accessory": "#ffcc00"}, "threads": [{"desc": "金鱼还在酒吧某个角落，但酒吧昨天被搜了", "target": "Raze", "weight": 9}]}
+  ],
+  "relations": [
+    {"from": "Nyx", "to": "Raze", "trust": -2, "fondness": 1, "jealousy": 0, "guilt": 0},
+    {"from": "Raze", "to": "Nyx", "trust": 2, "fondness": 3, "jealousy": 0, "guilt": 4},
+    {"from": "Vex", "to": "Raze", "trust": -3, "fondness": -1, "jealousy": 0, "guilt": 0},
+    {"from": "Glitch", "to": "Nyx", "trust": 3, "fondness": 5, "jealousy": 0, "guilt": 0},
+    {"from": "Silk", "to": "Nyx", "trust": -1, "fondness": 2, "jealousy": 0, "guilt": 0},
+    {"from": "Ash", "to": "Silk", "trust": -2, "fondness": 0, "jealousy": 0, "guilt": 0},
+    {"from": "Zero", "to": "Raze", "trust": 4, "fondness": 3, "jealousy": 0, "guilt": 0},
+    {"from": "Raze", "to": "Zero", "trust": 3, "fondness": 5, "jealousy": 0, "guilt": 0},
+    {"from": "Nyx", "to": "Glitch", "trust": 4, "fondness": 4, "jealousy": 0, "guilt": 0},
+    {"from": "Silk", "to": "Glitch", "trust": -2, "fondness": -3, "jealousy": 0, "guilt": 0}
+  ]
+}
